@@ -934,7 +934,7 @@ def WordNet_Definition(word):
 #----------------------------------------------------------------------
 if __name__ == '__main__':
 	db = os.path.join(os.path.dirname(__file__), 'test.db')
-	my = {'host':'xnode3.ddns.net', 'user':'skywind', 'passwd':'678900', 'db':'skywind_t9'}
+	my = {'host':'??', 'user':'skywind', 'passwd':'??', 'db':'skywind_t9'}
 	def test1():
 		t = time.time()
 		sd = StarDict(db)
