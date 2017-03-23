@@ -140,7 +140,7 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 * 搜索并校对：所有动物名词（http://lib.colostate.edu/wildlife/atoz.php?letter=all）
 * 搜索并校对：所有植物名词（http://davesgarden.com/guides/botanary/vbl/a/）
 * 搜索并校对：所有地理名词（http://www.itseducation.asia/geography/a.htm）
-* 搜索并校对：所有地名（https://wenku.baidu.com/view/5436f80876c66137ee0619c9.html）
+* 搜索并校对：所有地名（https://en.wikipedia.org/wiki/Lists_of_cities_by_country）
 * 补充完成非核心词汇的英文释义
 * 补充各个单词的位置信息
 * ~~补充动词的时态语态变种信息~~
