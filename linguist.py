@@ -9,7 +9,6 @@
 #
 #======================================================================
 import sys, os, time
-import en
 
 # https://www.nodebox.net/code/index.php/Linguistics
 
@@ -66,6 +65,7 @@ class WordHelper (object):
 
 	# 取得所有动词
 	def all_verbs (self):
+		import en
 		words = []
 		for n in en.wordnet.all_verbs():
 			words.append(n.form)
@@ -73,6 +73,7 @@ class WordHelper (object):
 
 	# 取得所有副词
 	def all_adverbs (self):
+		import en
 		words = []
 		for n in en.wordnet.all_adverbs():
 			words.append(n.form)
@@ -80,6 +81,7 @@ class WordHelper (object):
 
 	# 取得所有形容词
 	def all_adjectives (self):
+		import en
 		words = []
 		for n in en.wordnet.all_adjectives():
 			words.append(n.form)
@@ -87,6 +89,7 @@ class WordHelper (object):
 
 	# 取得所有名词
 	def all_adjectives (self):
+		import en
 		words = []
 		for n in en.wordnet.all_nouns():
 			words.append(n.form)
