@@ -1013,10 +1013,12 @@ class LemmaDB (object):
 		word = word.lower()
 		if not stem in self._stems:
 			self._stems[stem] = {}
-		self._stems[stem][word] = len(self._stems[stem]) 
+		if not word in self._stems[stem]:
+			self._stems[stem][word] = len(self._stems[stem]) 
 		if not word in self._words:
 			self._words[word] = {}
-		self._words[word][stem] = len(self._words[word])
+		if not stem in self._words[word]:
+			self._words[word][stem] = len(self._words[word])
 		return True
 
 	# 删除一个词根的一个衍生词
