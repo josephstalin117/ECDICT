@@ -63,6 +63,16 @@ class WordHelper (object):
 			return None
 		return tenses
 
+	# 名词的复数：有时候不可数名词也会被加上 -s，需要先判断是否可数（语料库）
+	def noun_plural (self, word):
+		import en
+		return en.noun.plural(word)
+
+	# 求解复数，使用 pattern.en 软件包
+	def pluralize (self, word):
+		import pattern.en
+		return pattern.en.pluralize(word)
+
 	# 取得所有动词
 	def all_verbs (self):
 		import en
@@ -88,7 +98,7 @@ class WordHelper (object):
 		return words
 
 	# 取得所有名词
-	def all_adjectives (self):
+	def all_nouns (self):
 		import en
 		words = []
 		for n in en.wordnet.all_nouns():
@@ -109,6 +119,41 @@ class WordHelper (object):
 #----------------------------------------------------------------------
 tools = WordHelper()
 
+#----------------------------------------------------------------------
+# WordRoot
+#----------------------------------------------------------------------
+class WordRoot (object):
+
+	def __init__ (self, root):
+		self.root = root
+		self.count = 0
+		self.words = {}
+
+	def add (self, c5, word, n = 1):
+		if c5 and word:
+			term = (c5, word)
+			if not term in self.words:
+				self.words[term] = n
+			else:
+				self.words[term] += n
+			self.count += n
+		return True
+
+	def dump (self):
+		output = []
+		for term in self.words:
+			c5, word = term
+			output.append((c5, word, self.words[term]))
+		output.sort(key = lambda x: (x[2], x[0]), reverse = True)
+		return output
+
+	def __len__ (self):
+		return len(self.words)
+	
+	def __getitem__ (self, key):
+		return self.words[key]
+
+
 
 #----------------------------------------------------------------------
 # testing
@@ -118,7 +163,115 @@ if __name__ == '__main__':
 		for word in ['was', 'gave', 'be', 'bound']:
 			print('%s -> %s'%(word, tools.lemmatize(word, 'v')))
 		return 0
-	test1()
+	def test2():
+		import ascmini
+		rows = ascmini.csv_load('bnc-words.csv')
+		output = []
+		words = {}
+		for row in rows:
+			root = row[0]
+			size = int(row[1])
+			c5 = row[2]
+			word = row[3]
+			count = int(row[4])
+			head = root[:1].lower()
+			if size <= 1:
+				continue
+			if count * 1000 / size < 1:
+				continue
+			if '*' in word:
+				continue
+			if c5 in ('UNC', 'CRD'):
+				continue
+			if '(' in root or '/' in root:
+				continue
+			if head != '\'' and (not head.isalpha()):
+				if head.isdigit():
+					continue
+				if head in ('$', '#', '-'):
+					continue
+			if root.count('\'') >= 2:
+				continue
+			if not root in words:
+				stem = WordRoot(root)
+				words[root] = stem
+			else:
+				stem = words[root]
+			stem.add(c5, word.lower(), count)
+		for key in words:
+			stem = words[key]
+			for c5, word, count in stem.dump():
+				output.append((stem.root, stem.count, c5, word, count))
+		output.sort(key = lambda x: (x[1], x[0]), reverse = True)
+		# ascmini.csv_save(output, 'bnc-clear.csv')
+		print 'count', len(words)
+	def test3():
+		import ascmini
+		rows = ascmini.csv_load('bnc-clear.csv')
+		output = []
+		words = {}
+		for row in rows:
+			root = row[0]
+			size = int(row[1])
+			c5 = row[2]
+			word = row[3].lower()
+			count = int(row[4])
+			if word == root:
+				continue
+			if not root in words:
+				stem = WordRoot(root)
+				words[root] = stem
+			else:
+				stem = words[root]
+			stem.add('*', word, count)
+			stem.count = size
+		fp = open('bnc-lemma.txt', 'w')
+		lemmas = []
+		for key in words:
+			stem = words[key]
+			part = []
+			for c5, word, count in stem.dump():
+				output.append((stem.root, stem.count, c5, word, count))
+				part.append('%s/%d'%(word, count))
+			if not part:
+				continue
+			text = '%s/%d -> '%(stem.root, stem.count)
+			lemmas.append((stem.count, stem.root, text + ','.join(part)))
+		output.sort(key = lambda x: (x[1], x[0]), reverse = True)
+		lemmas.sort(reverse = True)
+		for _, _, text in lemmas:
+			fp.write(text + '\n')
+		ascmini.csv_save(output, 'bnc-test.csv')
+		print 'count', len(words)
+		return 0
+	def test4():
+		import stardict
+		lm1 = stardict.LemmaDB()
+		lm2 = stardict.LemmaDB()
+		lm1.load('bnc-lemma.txt')
+		lm2.load('lemma.en.txt')
+		count1 = 0
+		count2 = 0
+		for stem in lm2.dump('stem'):
+			childs = lm2.get(stem)
+			stem = stem.lower()
+			if len(stem) <= 2 and stem.isupper():
+				continue
+			if not stem in lm1:
+				count1 += 1
+			else:
+				obj = lm1.get(stem)
+				for word in childs:
+					word = word.lower()
+					if not word in obj:
+						print '%s -> %s'%(stem, word)
+						count2 += 1
+			for word in childs:
+				lm1.add(stem, word.lower())
+		print 'count', count1, count2
+		lm1.save('lemma-bnc.txt')
+		return 0
+	test4()
 
 
 
