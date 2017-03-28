@@ -78,7 +78,7 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 
 ## 词根查询
 
-这个词根不是被单词的词根，而是各种单词的演变形式，动词的各种时态，形容词的比较最高级，名词的复数等等，每个单词有很多变体。你编写一个抓词软件抓到一个过去式的动词 gave，如果字典里面没有的话，就需要词根数据库来查询，把 gave转变为 give，再查词典数据库。
+这个词根不是背单词时候的词根，而是各种单词的演变形式，动词的各种时态，形容词的比较最高级，名词的复数等等，每个单词有很多变体。你编写一个抓词软件抓到一个过去式的动词 gave，如果字典里面没有的话，就需要词根数据库来查询，把 gave转变为 give，再查词典数据库。
 
 我扫描了 BNC语料库全部 1亿个词条语料生成的 lemma.en.txt 就是用来做这个事情，stardict.py 中 LemmaDB 这个类就是用来加载该数据并进行分析的。
 
@@ -86,11 +86,17 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 
 用 LemmaDB 类可以方便的查询 ['gave', 'taken', 'looked', 'teeth'] 的 lemma 是 ['give', 'take', 'look', 'tooth']，也可以查找 'take' 这个词的若干种变体。 
 
+这个 lemma.en.txt 涵盖了 BNC所有语料的各种词汇变形，95%的情况下你可以查到你想要的，这个作为首选方法，查不到再去依靠各种算法（判断词尾 -ed，-ing 等），最可靠的是数据库，算法次之。
+
+## 文字处理
+
+linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
+
 ## 更多文档
 
-[ECDICT Wiki](https://github.com/skywind3000/ECDICT/wiki)
-[选词](https://github.com/skywind3000/ECDICT/wiki/%E9%80%89%E8%AF%8D)
-[双解释义](https://github.com/skywind3000/ECDICT/wiki/%E5%8F%8C%E8%A7%A3%E9%87%8A%E4%B9%89)
+* [ECDICT Wiki](https://github.com/skywind3000/ECDICT/wiki)
+* [选词](https://github.com/skywind3000/ECDICT/wiki/%E9%80%89%E8%AF%8D)
+* [双解释义](https://github.com/skywind3000/ECDICT/wiki/%E5%8F%8C%E8%A7%A3%E9%87%8A%E4%B9%89)
 
 ## 欢迎贡献
 
