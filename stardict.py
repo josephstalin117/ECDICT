@@ -1079,10 +1079,14 @@ class LemmaDB (object):
 	def get (self, word, reverse = False):
 		if not reverse:
 			if not word in self._stems:
+				if word in self._words:
+					return [word]
 				return None
 			words = [ (v, k) for (k, v) in self._stems[word].items() ]
 		else:
 			if not word in self._words:
+				if word in self._stems:
+					return [word]
 				return None
 			words = [ (v, k) for (k, v) in self._words[word].items() ]
 		words.sort()
@@ -1595,7 +1599,7 @@ if __name__ == '__main__':
 		print(len(lemma))
 		for word in ('be', 'give', 'see', 'take'):
 			print('%s -> %s'%(word, ','.join(lemma.get(word))))
-		for word in ('gave', 'taken', 'looked', 'teeth'):
+		for word in ('gave', 'taken', 'looked', 'teeth', 'speak'):
 			print('%s <- %s'%(word, ','.join(lemma.word_stem(word))))
 		lemma.save('output.txt')
 		return 0
