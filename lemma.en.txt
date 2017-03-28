@@ -1,6 +1,6 @@
 ; En Lemma Database (version 1.0.2)
 ; Compiled by Lin Wei (https://github.com/skywind3000), Mar 28, 2017
-; by referencing the 100M+ words in British National Corpus (BNC), 
+; by referencing the 100M+ words in the British National Corpus (BNC), 
 ; and Yasumasa Someya's lemma list.
 ; This lemma list is provided "as is" and is free to use for any research
 ; and/or educational purposes. 
