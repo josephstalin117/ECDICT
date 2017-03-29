@@ -107,9 +107,8 @@ linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 
 ## 更多文档
 
-* [ECDICT Wiki](https://github.com/skywind3000/ECDICT/wiki)
-* [选词](https://github.com/skywind3000/ECDICT/wiki/%E9%80%89%E8%AF%8D)
-* [双解释义](https://github.com/skywind3000/ECDICT/wiki/%E5%8F%8C%E8%A7%A3%E9%87%8A%E4%B9%89)
+* [项目维基](https://github.com/skywind3000/ECDICT/wiki)
+
 
 ## 欢迎贡献
 
@@ -131,6 +130,7 @@ linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 
 ## HISTORY
 
+* 2017-3-29 整理完所有动词的衍生形式
 * 2017-3-28 整理文档，补全网友提供的部分释义包括一些地名和人名
 * 2017-3-27 再次根据 BNC，并且自动生成字典中缺少的动词，名词和形容词的各种时态语态。
 * 2017-3-26 全面统计 BNC 原始语料库中一亿个单词，生成单词变化数据库 lemma.en.txt。
