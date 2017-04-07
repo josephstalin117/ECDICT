@@ -1469,8 +1469,8 @@ def open_dict(filename):
 
 # 字典转化，csv sqlite之间互转
 def convert_dict(dstname, srcname):
-	dst = self.open_dict(dstname)
-	src = self.open_dict(srcname)
+	dst = open_dict(dstname)
+	src = open_dict(srcname)
 	dst.delete_all()
 	pc = tools.progress(len(src))
 	for word in src.dumps():
