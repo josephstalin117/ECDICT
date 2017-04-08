@@ -12,6 +12,7 @@ import sys
 import os
 import time
 import stardict
+import codecs
 
 
 #----------------------------------------------------------------------
@@ -24,9 +25,9 @@ if sys.version_info[0] >= 3:
 
 
 #----------------------------------------------------------------------
-# 
+# Word Generator
 #----------------------------------------------------------------------
-class generator (object):
+class Generator (object):
 
 	def __init__ (self):
 		terms = {}
@@ -83,12 +84,12 @@ class generator (object):
 		if not data:
 			return ''
 		exchange = data.get('exchange')
-		exchange = self.exchange_loads(exchange)
+		exchange = stardict.tools.exchange_loads(exchange)
 		if not exchange:
 			return ''
 		part = []
 		last = ''
-		for k, v in self._exchanges:
+		for k, v in stardict.tools._exchanges:
 			p = exchange.get(k)
 			if p and p != last:
 				part.append(u'%s'%p)
@@ -194,6 +195,17 @@ class generator (object):
 		return pc.count
 
 
+#----------------------------------------------------------------------
+# generation
+#----------------------------------------------------------------------
+generator = Generator()
+
+
+#----------------------------------------------------------------------
+# testing case
+#----------------------------------------------------------------------
 if __name__ == '__main__':
 	print ''
+
+
 
