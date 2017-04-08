@@ -112,26 +112,25 @@ class Generator (object):
 			pc.next()
 			data = dictionary[word]
 			phonetic = data['phonetic']
-			translation = data['translation'].replace('\\', ' ')
-			translation = translation.replace('\n', '\\n')
+			translation = data['translation']
 			head = self.word_level(data)
 			tag = self.word_tag(data)
 			if phonetic:
 				if head:
-					text = '*[' + phonetic + ']   -' + head + '\\n'
+					text = '*[' + phonetic + ']   -' + head + '\n'
 				else:
-					text = '*[' + phonetic + ']\\n'
+					text = '*[' + phonetic + ']\n'
 			elif head:
-				text = '-' + head + '\\n'
+				text = '-' + head + '\n'
 			else:
 				text = ''
 			text = text + translation
 			exchange = self.word_exchange(data)
 			if exchange:
 				exchange = exchange.replace('\\', '').replace('\n', '')
-				text = text + '\\n\\n' + u'[时态] ' + exchange + ''
+				text = text + '\n\n' + u'[时态] ' + exchange + ''
 			if tag:
-				text = text + '\\n' + '(' + tag + ')'
+				text = text + '\n' + '(' + tag + ')'
 			out[word] = text
 		pc.done()
 		print('saving ...')
