@@ -1378,24 +1378,23 @@ class DictHelper (object):
 			return None
 		return detail.get(item, None)
 
-	# csv 读取，自动检测编码
-	def csv_load (self, filename, encoding = None):
+	# load file and guess encoding
+	def load_text (self, filename, encoding = None):
 		content = None
-		text = None
 		try:
 			content = open(filename, 'rb').read()
 		except:
-			return None
-		if content is None:
 			return None
 		if content[:3] == b'\xef\xbb\xbf':
 			text = content[3:].decode('utf-8')
 		elif encoding is not None:
 			text = content.decode(encoding, 'ignore')
 		else:
-			codec = sys.getdefaultencoding()
 			text = None
-			for name in [codec, 'utf-8', 'gbk', 'ascii', 'latin1']:
+			guess = [sys.getdefaultencoding(), 'utf-8']
+			if sys.stdout and sys.stdout.encoding:
+				guess.append(sys.stdout.encoding)
+			for name in guess + ['gbk', 'ascii', 'latin1']:
 				try:
 					text = content.decode(name)
 					break
@@ -1403,6 +1402,11 @@ class DictHelper (object):
 					pass
 			if text is None:
 				text = content.decode('utf-8', 'ignore')
+		return text
+
+	# csv 读取，自动检测编码
+	def csv_load (self, filename, encoding = None):
+		text = self.load_text(filename, encoding)
 		if not text:
 			return None
 		import csv
@@ -1447,6 +1451,32 @@ class DictHelper (object):
 				newrow.append(n)
 			writer.writerow(newrow)
 		fp.close()
+		return True
+
+	# 加载 tab 分割的 txt 文件, 返回 key, value
+	def tab_txt_load (self, filename, encoding = None):
+		words = {}
+		for line in self.load_text(filename, encoding).split('\n'):
+			line = line.strip('\r\n\t ')
+			if not line:
+				continue
+			p1 = line.find('\t')
+			if p1 < 0:
+				continue
+			word = line[:p1].rstrip('\r\n\t ')
+			text = line[p1:].lstrip('\r\n\t ')
+			text = text.replace('\\n', '\n').replace('\\r', '\r')
+			words[word] = text.replace('\\t', '\t').replace('\\\\', '\\')
+		return words
+
+	# 保存 tab 分割的 txt文件
+	def tab_txt_save (self, filename, words, encoding = 'utf-8'):
+		with codecs.open(filename, 'w', encoding = encoding) as fp:
+			for word in words:
+				text = words[word]
+				text = text.replace('\\', '\\\\').replace('\n', '\\n')
+				text = text.replace('\r', '\\r').replace('\t', '\\t')
+				fp.write('%s\t%s\r\n'%(word, text))
 		return True
 
 
@@ -1494,7 +1524,6 @@ def convert_dict(dstname, srcname):
 	dst.commit()
 	pc.done()
 	return True
-
 
 
 
