@@ -113,6 +113,11 @@ class Generator (object):
 			data = dictionary[word]
 			phonetic = data['phonetic']
 			translation = data['translation']
+			if not translation:
+				translation = data['definition']
+			if not translation:
+				print('missing: %s'%word)
+				continue
 			head = self.word_level(data)
 			tag = self.word_tag(data)
 			if phonetic:
@@ -151,6 +156,10 @@ class Generator (object):
 			data = dictionary[word]
 			phonetic = data['phonetic']
 			translation = data['translation']
+			if not translation:
+				translation = data['definition']
+			if not translation:
+				continue
 			head = self.word_level(data)
 			tag = self.word_tag(data)
 			fp.write(word.replace('\r', '').replace('\n', '') + '\r\n')
