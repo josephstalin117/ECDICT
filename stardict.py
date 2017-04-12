@@ -1190,6 +1190,12 @@ class DictHelper (object):
 				continue
 			if '(' in word:
 				continue
+			if '/' in word:
+				continue
+			if '"' in word or '#' in word:
+				continue
+			if '0' in word or '1' in word or '2' in word or '3' in word:
+				continue
 			if 's' in opts:
 				if word.count(' ') >= 2:
 					continue
@@ -1477,6 +1483,24 @@ class DictHelper (object):
 				text = text.replace('\\', '\\\\').replace('\n', '\\n')
 				text = text.replace('\r', '\\r').replace('\t', '\\t')
 				fp.write('%s\t%s\r\n'%(word, text))
+		return True
+
+	# Tab 分割的 txt文件释义导入
+	def tab_txt_import (self, dictionary, filename):
+		words = self.tab_txt_load(filename)
+		if not words:
+			return False
+		pc = self.progress(len(words))
+		for word in words:
+			data = dictionary.query(word)
+			if not data:
+				dictionary.register(word, {'translation':words[word]}, False)
+			else:
+				dictionary.update(word, {'translation':words[word]}, False)
+			pc.inc(0)
+			pc.next()
+		dictionary.commit()
+		pc.done()
 		return True
 
 
