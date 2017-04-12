@@ -204,16 +204,221 @@ class Generator (object):
 
 
 #----------------------------------------------------------------------
+# 
+#----------------------------------------------------------------------
+class OnlineDictionary (object):
+
+	def __init__ (self):
+		self.google_translator = None
+		self.urban_dictionary = None
+	
+	def _http_request (self, url, timeout, data, post, head = None):
+		headers = []
+		import urllib
+		import ssl
+		if sys.version_info[0] >= 3:
+			import urllib.parse
+			import urllib.request
+			import urllib.error
+			if data is not None:
+				if isinstance(data, dict):
+					data = urllib.parse.urlencode(data)
+			if not post:
+				if data is None:
+					req = urllib.request.Request(url)
+				else:
+					mark = '?' in url and '&' or '?'
+					req = urllib.request.Request(url + mark + data)
+			else:
+				data = data is not None and data or ''
+				if not isinstance(data, bytes):
+					data = data.encode('utf-8', 'ignore')
+				req = urllib.request.Request(url, data)
+			if head:
+				for k, v in head:
+					req.add_header(k, v)
+			try:
+				res = urllib.request.urlopen(req, timeout = timeout)
+				headers = res.getheaders()
+			except urllib.error.HTTPError as e:
+				return e.code, str(e.message), None
+			except urllib.error.URLError as e:
+				return -1, str(e), None
+			except socket.timeout:
+				return -2, 'timeout', None
+			except ssl.SSLError:
+				return -2, 'timeout', None
+			content = res.read()
+		else:
+			import urllib2
+			if data is not None:
+				if isinstance(data, dict):
+					part = {}
+					for key in data:
+						val = data[key]
+						if isinstance(key, unicode):
+							key = key.encode('utf-8')
+						if isinstance(val, unicode):
+							val = val.encode('utf-8')
+						part[key] = val
+					data = urllib.urlencode(part)
+				if not isinstance(data, bytes):
+					data = data.encode('utf-8', 'ignore')
+			if not post:
+				if data is None:
+					req = urllib2.Request(url)
+				else:
+					mark = '?' in url and '&' or '?'
+					req = urllib2.Request(url + mark + data)
+			else:
+				req = urllib2.Request(url, data is not None and data or '')
+			if head:
+				for k, v in head:
+					req.add_header(k, v)
+			try:
+				res = urllib2.urlopen(req, timeout = timeout)
+				content = res.read()
+				if res.info().headers:
+					for line in res.info().headers:
+						line = line.rstrip('\r\n\t')
+						pos = line.find(':')
+						if pos < 0:
+							continue
+						key = line[:pos].rstrip('\t ')
+						val = line[pos + 1:].lstrip('\t ')
+						headers.append((key, val))
+			except urllib2.HTTPError as e:
+				return e.code, str(e.message), None
+			except urllib2.URLError as e:
+				return -1, str(e), None
+			except socket.timeout:
+				return -2, 'timeout', None
+			except ssl.SSLError:
+				return -2, 'timeout', None
+		return 200, content, headers
+
+	def request (self, url, data = None, timeout = 15, post = False):
+		count = 0
+		x = -1, None
+		while count < 3:
+			head = []
+			head.append(('Content-Type', 'text/plain; charset:utf-8;'))
+			x = self._http_request(url, timeout, data, post, head)
+			code = x[0]
+			if x != -2:
+				return x[0], x[1]
+			count += 1
+		return x[0], x[1]
+
+	def google (self, word):
+		if not self.google_translator:
+			from googletranslate import Translator
+			p = ['translate.google.com.hk', 'translate.google.com']
+			self.google_translator = Translator()
+		translator = self.google_translator
+		x = translator.translate(word, src='en', dest='zh-CN')
+		if not x:
+			return None
+		text = x.text
+		if text == word:
+			return None
+		return (word, None, text, None)
+
+	def urban (self, word):
+		import urbandictionary
+		defs = urbandictionary.define(word)
+		if not defs:
+			return None
+		definition = defs[0].definition
+		example = defs[0].example
+		if example:
+			definition += '\n'
+			for line in example.split('\n'):
+				line = line.rstrip('\r\n\t ')
+				if not line:
+					continue
+				definition += '> ' + line + '\n'
+		return (word, None, None, definition)
+
+	def _bing_extract (self, html):
+		from bs4 import BeautifulSoup
+		p1 = html.find('<div class="hd_div" id="headword">')
+		if p1 < 0:
+			return None
+		html = html[p1:]
+		bs = BeautifulSoup(html, 'lxml')
+		obj = {}
+		head = bs.find('div', class_ = 'hd_div')
+		obj['word'] = unicode(head.text.strip('\r\n\t '))
+		pron = bs.find('div', class_ = 'hd_pr')
+		if pron:
+			text = unicode(pron.text).strip('\r\n\t ')
+			p1 = text.find('[')
+			if p1 >= 0:
+				p2 = text.find(']', p1)
+				if p2 >= 0:
+					text = text[p1+1:p2]
+			obj['phonetic'] = text
+		else:
+			obj['phonetic'] = None
+		lines = []
+		for li in bs.ul.contents:
+			if li.name == 'li':
+				text = ''
+				pos = li.find('span', class_ = 'pos')
+				if pos:
+					pos = pos.text.strip('\r\n\t ')
+					if pos == u'网络':
+						pos = u'[网络]'
+					text = pos + ' '
+				text += li.find('span', class_ = 'def').text.strip('\r\n\t ')
+				lines.append(text)
+		return obj['word'], obj['phonetic'], '\n'.join(lines)
+
+	def bing (self, word):
+		url = 'http://cn.bing.com/dict/search'
+		data = {}
+		data['intlF'] = 0
+		data['q'] = word
+		code, html = self.request(url, data, 20, False)
+		if code != 200:
+			print html
+			return None
+		data = None
+		try:
+			data = self._bing_extract(html)
+		except:
+			code, html = self.request(url, data, 20, False)
+			if code != 200:
+				return None
+			if 1:
+				data = self._bing_extract(html)
+			if 0:
+				return None
+		if data is None:
+			return None
+		return data[0], data[1], data[2], None
+
+
+
+
+#----------------------------------------------------------------------
 # generation
 #----------------------------------------------------------------------
 generator = Generator()
+online = OnlineDictionary()
 
 
 #----------------------------------------------------------------------
 # testing case
 #----------------------------------------------------------------------
 if __name__ == '__main__':
-	print ''
+	def test1():
+		print online.bing('hello')
+		print online.google('hello')
+		return 0
+
+	test1()
 
 
 
