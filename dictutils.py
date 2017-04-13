@@ -313,8 +313,8 @@ class OnlineDictionary (object):
 	def google (self, word):
 		if not self.google_translator:
 			from googletranslate import Translator
-			p = ['translate.google.com.hk', 'translate.google.com']
-			self.google_translator = Translator()
+			p = ['translate.google.com']
+			self.google_translator = Translator(service_urls = p)
 		translator = self.google_translator
 		x = translator.translate(word, src='en', dest='zh-CN')
 		if not x:
