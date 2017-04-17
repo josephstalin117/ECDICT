@@ -1177,7 +1177,7 @@ class DictHelper (object):
 		return words
 
 	# 字典差异导出
-	def deficit_export (self, dictionary, words, outname, opts = ''):
+	def discrepancy_export (self, dictionary, words, outname, opts = ''):
 		existence = self.dump_map(dictionary)
 		if os.path.splitext(outname)[-1].lower() in ('.txt', '.csv'):
 			db = DictCsv(outname)
@@ -1199,6 +1199,12 @@ class DictHelper (object):
 			if 's' in opts:
 				if word.count(' ') >= 2:
 					continue
+			if 't' in opts:
+				if ' ' in word:
+					continue
+			if 'p' in opts:
+				if '-' in word:
+					continue
 			try:
 				word.encode('ascii')
 			except:
@@ -1210,7 +1216,7 @@ class DictHelper (object):
 		return count
 
 	# 字典差异导入
-	def deficit_import (self, dictionary, filename):
+	def discrepancy_import (self, dictionary, filename, opts = ''):
 		existence = self.dump_map(dictionary)
 		if os.path.splitext(filename)[-1].lower() in ('.csv', '.txt'):
 			db = DictCsv(filename)
@@ -1236,7 +1242,8 @@ class DictHelper (object):
 			if not update:
 				continue
 			if word.lower() in existence:
-				dictionary.update(word, update, False)
+				if not 'n' in opts:
+					dictionary.update(word, update, False)
 			else:
 				dictionary.register(word, update, False)
 			count += 1
@@ -1462,7 +1469,10 @@ class DictHelper (object):
 	# 加载 tab 分割的 txt 文件, 返回 key, value
 	def tab_txt_load (self, filename, encoding = None):
 		words = {}
-		for line in self.load_text(filename, encoding).split('\n'):
+		content = self.load_text(filename, encoding)
+		if content is None:
+			return None
+		for line in content.split('\n'):
 			line = line.strip('\r\n\t ')
 			if not line:
 				continue
@@ -1548,6 +1558,17 @@ def convert_dict(dstname, srcname):
 	dst.commit()
 	pc.done()
 	return True
+
+
+# 从 ~/.local/share/stardict 下面打开词典
+def open_local(filename):
+	base = os.path.expanduser('~/.local')
+	for dir in [base, base + '/share', base + '/share/stardict']:
+		if not os.path.exists(dir):
+			os.mkdir(dir)
+	fn = os.path.join(base + '/share/stardict', filename)	
+	return open_dict(fn)
+
 
 
 
