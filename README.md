@@ -100,6 +100,7 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 
 生成 Anki 卡片的时候，你可以优先使用你自己的库的信息，你自己的库里没有了，再找 ECDICT。而 ECDICT里面的各种词频标注，考试大纲标注，也可以给你提供不同层次的参考。比如你想把托福里面去除六级的词汇筛选出来（很多重合），这时 EDICT本身的标注信息就能让你方便的完成这个工作了，你也可以把词频三万一下的单词导出来成为 Excel，进行更多处理。
 
+最新版数据太大，我已经把数据库压缩成 stardict.7z了，外面默认的 ecdict.csv 算是一个基础版本（76万词条）。
 
 ## 文字处理
 
@@ -122,14 +123,15 @@ linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 * 搜索并校对：所有动物名词（http://lib.colostate.edu/wildlife/atoz.php?letter=all）
 * 搜索并校对：所有植物名词（http://davesgarden.com/guides/botanary/vbl/a/）
 * 搜索并校对：所有地理名词（http://www.itseducation.asia/geography/a.htm）
-* 搜索并校对：所有地名（https://en.wikipedia.org/wiki/Lists_of_cities_by_country）
-* 补充完成非核心词汇的英文释义
+* ~~搜索并校对：所有地名（https://en.wikipedia.org/wiki/Lists_of_cities_by_country）~~
+* ~~补充完成非核心词汇的英文释义~~
 * 补充各个单词的位置信息
 * ~~补充动词的时态语态变种信息~~
 * 继续修订核心两万词汇的释义准确性
 
 ## HISTORY
 
+* 2017-4-20 在网友大力支持下，版本 1.0.14 发布，收词 222万
 * 2017-4-7 收录开源词典 《[屌丝字典](https://github.com/fxsjy/diaosi)》的英汉部分。
 * 2017-3-31 修正当代语料库词频数据和部分 BNC数据。
 * 2017-3-29 整理完所有动词的衍生形式
