@@ -1336,6 +1336,30 @@ class DictHelper (object):
 			writer.write(fp)
 		return True
 
+	# 读取 .mdx 文件，需要 readmdict 支持：
+	# https://github.com/skywind3000/writemdict (包含readmdict）
+	# https://bitbucket.org/xwang/mdict-analysis
+	def read_mdx (self, mdxname, mdd = False):
+		try:
+			import readmdict
+		except ImportError:
+			print('ERROR: can\'t import readmdict module, please install it:')
+			print('https://bitbucket.org/xwang/mdict-analysis')
+			print('https://github.com/skywind3000/writemdict')
+			sys.exit(1)
+		words = {}
+		if not mdd:
+			mdx = readmdict.MDX(mdxname)
+		else:
+			mdx = readmdict.MDD(mdxname)
+		for key, value in mdx.items():
+			key = key.decode('utf-8', 'ignore')
+			if not mdd:
+				words[key] = value.decode('utf-8', 'ignore')
+			else:
+				words[key] = value
+		return words
+
 	# 导出词形变换字符串
 	def exchange_dumps (self, obj):
 		part = []
