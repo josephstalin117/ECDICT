@@ -1340,14 +1340,12 @@ class DictHelper (object):
 		return words
 
 	# 直接生成 .mdx文件，需要 writemdict 支持：
-	# https://github.com/zhansliu/writemdict
 	# https://github.com/skywind3000/writemdict
 	def export_mdx (self, wordmap, outname, title, desc = None):
 		try:
 			import writemdict
 		except ImportError:
 			print('ERROR: can\'t import writemdict module, please install it:')
-			print('https://github.com/zhansliu/writemdict')
 			print('https://github.com/skywind3000/writemdict')
 			sys.exit(1)
 		if desc is None:
@@ -1360,13 +1358,11 @@ class DictHelper (object):
 
 	# 读取 .mdx 文件，需要 readmdict 支持：
 	# https://github.com/skywind3000/writemdict (包含readmdict）
-	# https://bitbucket.org/xwang/mdict-analysis
 	def read_mdx (self, mdxname, mdd = False):
 		try:
 			import readmdict
 		except ImportError:
 			print('ERROR: can\'t import readmdict module, please install it:')
-			print('https://bitbucket.org/xwang/mdict-analysis')
 			print('https://github.com/skywind3000/writemdict')
 			sys.exit(1)
 		words = {}
