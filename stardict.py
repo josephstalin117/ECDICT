@@ -1317,6 +1317,28 @@ class DictHelper (object):
 		pc.done()
 		return True
 
+	# 导入mdx源文件
+	def import_mdict (self, filename, encoding = 'utf-8'):
+		import codecs
+		words = {}
+		with codecs.open(filename, 'r', encoding = encoding) as fp:
+			text = []	
+			word = None
+			for line in fp:
+				line = line.rstrip('\r\n')
+				if word is None:
+					if line == '':
+						continue
+					else:
+						word = line.strip()
+				elif line.strip() != '</>':
+					text.append(line)
+				else:
+					words[word] = '\n'.join(text)
+					word = None
+					text = []
+		return words
+
 	# 直接生成 .mdx文件，需要 writemdict 支持：
 	# https://github.com/zhansliu/writemdict
 	# https://github.com/skywind3000/writemdict
@@ -1537,6 +1559,62 @@ class DictHelper (object):
 		pc.done()
 		return True
 
+	# mdx-builder 使用writemdict代替MdxBuilder处理较大词典（需64为python）
+	def mdx_build (self, srcname, outname, title, desc = None):
+		print('loading %s'%srcname)
+		t = time.time()
+		words = self.import_mdict(srcname)
+		t = time.time() - t
+		print(u'%d records loaded in %.3f seconds'%(len(words), t))
+		print(u'building %s'%outname)
+		t = time.time()
+		self.export_mdx(words, outname, title, desc)
+		t = time.time() - t
+		print(u'complete in %.3f seconds'%t)
+		return True
+		
+	# 验证单词合法性
+	def validate_word (self, word, asc128):
+		alpha = 0
+		for ch in word:
+			if ch.isalpha():
+				alpha += 1
+			if ord(ch) >= 128 and asc128:
+				return False
+			elif (not ch.isalpha()) and (not ch.isdigit()):
+				if not ch in ('-', '\'', '/', '(', ')', ' ', ',', '.'):
+					if not ch in ('&', '!', '?', '_'):
+						if len(word) == 5 and word[2] == ';':
+							continue
+						if not ord(ch) in (239, 65292):
+							# print 'f1', ord(ch), word.find(ch)
+							return False
+		if alpha == 0:
+			return False
+		if word[:1] == '"' and word[-1:] == '"':
+			return False
+		if word[:1] == '(' and word[-1:] == ')':
+			if word.count('(') == 1:
+				return False
+		if word[:3] == '(-)':
+			return False
+		for ch in ('<', '>', '%', '*', '@', '`'):
+			if ch in word:
+				return False
+		if '%' in word or '\\' in word or '`' in word:
+			return False
+		if word[:1] in ('$', '@'):
+			return False
+		if len(word) == 1:
+			x = ord(word)
+			if (x < ord('a')) and (x > ord('z')):
+				if (x < ord('A')) and (x > ord('Z')):
+					return False
+		try:
+			word.lower()
+		except UnicodeWarning:
+			return False
+		return True
 
 
 #----------------------------------------------------------------------
@@ -1666,6 +1744,8 @@ if __name__ == '__main__':
 			print('%s <- %s'%(word, ','.join(lemma.word_stem(word))))
 		lemma.save('output.txt')
 		return 0
+	def test5():
+		print(tools.validate_word(u'Hello World'))
 	test3()
 
 
