@@ -164,7 +164,7 @@ class Generator (object):
 			tag = self.word_tag(data)
 			fp.write(word.replace('\r', '').replace('\n', '') + '\r\n')
 			if 'name' in mode:
-				fp.write('<b style="font-size:200%%;">%s'%text2html(word))
+				fp.write('<b style="font-size:180%%;">%s'%text2html(word))
 				fp.write('</b><br><br>\r\n')
 			if 'phonetic' in mode:
 				if phonetic or head:
@@ -201,4 +201,42 @@ class Generator (object):
 			count += 1
 		pc.done()
 		return pc.count
+
+	def list_load (self, filename, encoding = 'utf-8'):
+		words = {}
+		import codecs
+		with codecs.open(filename, encoding = encoding) as fp:
+			for line in fp:
+				line = line.strip('\r\n\t ')
+				if not line:
+					continue
+				words[line] = 1
+		return words
+
+	def list_save (self, filename, words):
+		import codecs
+		with codecs.open(filename, 'w', encoding = 'utf-8') as fp:
+			for w in words:
+				fp.write(w + '\n')
+		return True
+
+
+
+#----------------------------------------------------------------------
+# generation
+#----------------------------------------------------------------------
+generator = Generator()
+
+
+#----------------------------------------------------------------------
+# testing case
+#----------------------------------------------------------------------
+if __name__ == '__main__':
+	
+	def test1():
+		print('hello')
+
+	test1()
+
+
 
