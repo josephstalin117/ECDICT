@@ -223,9 +223,170 @@ class Generator (object):
 
 
 #----------------------------------------------------------------------
+# 解析 resemble.txt 生成辨析释义
+#----------------------------------------------------------------------
+class Resemble (object):
+
+	def __init__ (self):
+		self._resembles = []
+		self._words = {}
+		self._filename = None
+		self._lineno = 0
+
+	def error (self, text):
+		t = '%s:%s: error: %s\n'
+		t = t%(self._filename, self._lineno, text)
+		sys.stderr.write(t)
+		sys.stderr.flush()
+	
+	def load (self, filename):
+		self._resembles = []
+		self._words = {}
+		file_content = stardict.tools.load_text(filename)
+		if file_content is None:
+			sys.stderr.write('cannot read: %s\n'%filename)
+			return False
+		key = None
+		content = []
+		self._filename = filename
+		self._lineno = 0
+		for line in file_content.split('\n'):
+			line = line.strip('\r\n\t ')
+			self._lineno += 1
+			if key is None:
+				if not line:
+					continue
+				if line[:1] != '%':
+					self.error('must starts with a percent sign')
+					return False
+				line = line[1:].lstrip('\r\n\t ')
+				key = [ n.strip('\r\n\t ') for n in line.split(',') ]
+				if not key:
+					self.error('empty heading words')
+					return False
+				content = []
+			else:
+				if not line:
+					wt = {}
+					wt['words'] = tuple(key)
+					wt['content'] = content
+					self._resembles.append(wt)
+					key = None
+					content = []
+				elif line[:1] == '-':
+					line = line[1:].lstrip('\r\n\t')
+					pos = line.find(':')
+					if pos < 0:
+						self.error('expect colon')
+					word = line[:pos].strip('\r\n\t ')
+					text = line[pos+1:].strip('\r\n\t ')
+					text = text.replace('\\n', '\n')
+					content.append((word, text))
+				else:
+					content.append(line)
+		if key:
+			wt = {'words':tuple(key), 'content':content}
+			self._resembles.append(wt)
+		self._init_refs()
+		return True
+
+	def _init_refs (self):
+		self._words = {}
+		words = {}
+		for wt in self._resembles:
+			for word in wt['words']:
+				if not word in words:
+					words[word] = []
+				words[word].append(wt)
+		for word in words:
+			self._words[word] = tuple(words[word])
+		return True
+
+	def __len__ (self):
+		return len(self._resembles)
+
+	def __getitem__ (self, key):
+		if isinstance(key, int) or isinstance(key, long):
+			return self._resembles[key]
+		return self._words[key]
+
+	def __contains__ (self, key):
+		if isinstance(key, int) or isinstance(key, long):
+			if key < 0 or key >= len(self._resembles):
+				return False
+		elif not key in self._words:
+			return False
+		return True
+
+	def __iter__ (self):
+		return self._resembles.__iter__()
+
+	def text2html (self, text):
+		import cgi
+		return cgi.escape(text, True).replace('\n', '<br>')
+
+	def dump_text (self, wt):
+		lines = []
+		lines.append('% ' + (', '.join(wt['words'])))
+		for content in wt['content']:
+			if isinstance(content, list) or isinstance(content, tuple):
+				word, text = content
+				text = text.replace('\n', '\\n')
+				lines.append('- ' + word + ': ' + text)
+			else:
+				lines.append(content)
+		return '\n'.join(lines)
+
+	def dump_html (self, wt):
+		lines = []
+		text2html = self.text2html
+		lines.append('<div class="discriminate">')
+		text = ', '.join(wt['words'])
+		text = '<div class="dis-group"><b>' + text2html(text) + '</b></div>'
+		lines.append(text)
+		lines.append('<div class="dis-content">')
+		for content in wt['content']:
+			if isinstance(content, tuple) or isinstance(content, list):
+				head = content[0]
+				desc = content[1]
+				text = '<font color="dodgerblue">%s</font>: '%text2html(head)
+				text = text + text2html(desc)
+				lines.append(text + '<br>')
+			else:
+				lines.append(text2html(content) + '<br>')
+		lines.append('</div>')
+		lines.append('</div>')
+		return '\n'.join(lines)
+
+	def compile_mdx (self, filename):
+		words = {}
+		if (not self._resembles) or (not self._words):
+			return False
+		pc = stardict.tools.progress(len(self._words))
+		for word in self._words:
+			pc.next()
+			wts = [ self.dump_html(wt) for wt in self._words[word] ]
+			words[word] = '<br>\n'.join(wts)
+		title = u'有道词语辨析'
+		text = time.strftime('%Y-%m-%d %H:%M:%S')
+		desc = u'<font color="red">\n'
+		desc += u'有道词语辨析<br>\n'
+		desc += u'词条数：%d<br>\n'%len(self._words)
+		desc += u'词组数：%d<br>\n'%len(self._resembles)
+		desc += u'作者：skywind<br>\n'
+		desc += u'日期：%s<br>\n'%text
+		desc += '</font>'
+		stardict.tools.export_mdx(words, filename, title, desc)
+		pc.done()
+		return True
+
+
+
+#----------------------------------------------------------------------
 # generation
 #----------------------------------------------------------------------
 generator = Generator()
+resemble = Resemble()
 
 
 #----------------------------------------------------------------------
@@ -236,7 +397,18 @@ if __name__ == '__main__':
 	def test1():
 		print('hello')
 
-	test1()
+	def test2():
+		resemble.load('resemble.txt')
+		print resemble.dump_text(resemble[0])
+		print ''
+		return 0
+
+	def test3():
+		resemble.load('resemble.txt')
+		fn = 'd:/Program Files/GoldenDict/content/youdao.mdx'
+		resemble.compile_mdx(fn)
+
+	test2()
 
 
 
