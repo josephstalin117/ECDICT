@@ -268,8 +268,11 @@ class Resemble (object):
 			else:
 				if not line:
 					wt = {}
+					uuid = [ n for n in key ]
+					uuid.sort()
 					wt['words'] = tuple(key)
 					wt['content'] = content
+					wt['uuid'] = ', '.join(uuid)
 					self._resembles.append(wt)
 					key = None
 					content = []
@@ -286,6 +289,9 @@ class Resemble (object):
 					content.append(line)
 		if key:
 			wt = {'words':tuple(key), 'content':content}
+			uuid = [ n for n in key ]
+			uuid.sort()
+			wt['uuid'] = uuid
 			self._resembles.append(wt)
 		self._init_refs()
 		return True
@@ -293,11 +299,18 @@ class Resemble (object):
 	def _init_refs (self):
 		self._words = {}
 		words = {}
+		existence = {}
 		for wt in self._resembles:
 			for word in wt['words']:
 				if not word in words:
 					words[word] = []
+				if not word in existence:
+					existence[word] = {}
+				uuid = wt['uuid']
+				if uuid in existence[word]:
+					continue
 				words[word].append(wt)
+				existence[word][uuid] = 1
 		for word in words:
 			self._words[word] = tuple(words[word])
 		return True
@@ -365,6 +378,8 @@ class Resemble (object):
 		pc = stardict.tools.progress(len(self._words))
 		for word in self._words:
 			pc.next()
+			if not word:
+				continue
 			wts = [ self.dump_html(wt) for wt in self._words[word] ]
 			words[word] = '<br>\n'.join(wts)
 		title = u'有道词语辨析'
@@ -405,10 +420,10 @@ if __name__ == '__main__':
 
 	def test3():
 		resemble.load('resemble.txt')
-		fn = 'd:/Program Files/GoldenDict/content/youdao.mdx'
+		fn = u'd:/Program Files/GoldenDict/content/others/有道词语辨析.mdx'
 		resemble.compile_mdx(fn)
 
-	test2()
+	test3()
 
 
 
