@@ -6325,10 +6325,10 @@ can和may都可能表示可能性，前者表理论上的可能性，而后者�
 - sophisticated: 侧重指事物发展到或达到高级的程度所体现出的复杂。
 - intricate: 着重指错综复杂，令人迷惑理解。
 
-% confinement, confinement, , concentrate, restraint, focus, limitation
+% confinement, confinement, concentrate, restraint, focus, limitation
 这组词都有“限制，局限”的意思，其区别是：
 - confinement: n.限制，囚禁(于某地或某种境地)。
-- confinement,: limitation, restraint
+- confinement: limitation, restraint
 - concentrate: v.集中，集中精力(后接on，宾语可以是具体或抽象的东西)；浓缩，压缩。
 - restraint: n.克制，抑制；约束措施。
 - focus: v.集中(于某事物)；将(注意力等)集中于……(后接on，宾语一般不是具体的东西)。
