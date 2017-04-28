@@ -98,6 +98,18 @@ class Generator (object):
 			return ''
 		return ', '.join(part)
 
+	def word_pos (self, data):
+		pos = stardict.tools.pos_extract(data)
+		if not pos:
+			return None
+		if len(pos) < 2:
+			return None
+		text = []
+		for mode, num in pos:
+			text.append('%s(%s%%)'%(mode[0], num))
+		desc = ', '.join(text)
+		return desc.replace('\\', '').replace('\n', '')
+
 	def text2html (self, text):
 		import cgi
 		return cgi.escape(text, True).replace('\n', '<br>')
@@ -264,6 +276,10 @@ class Resemble (object):
 				if not key:
 					self.error('empty heading words')
 					return False
+				for word in key:
+					if not word:
+						self.error('empty item')
+						return False
 				content = []
 			else:
 				if not line:
@@ -371,7 +387,7 @@ class Resemble (object):
 		lines.append('</div>')
 		return '\n'.join(lines)
 
-	def compile_mdx (self, filename):
+	def compile_map (self):
 		words = {}
 		if (not self._resembles) or (not self._words):
 			return False
@@ -382,6 +398,10 @@ class Resemble (object):
 				continue
 			wts = [ self.dump_html(wt) for wt in self._words[word] ]
 			words[word] = '<br>\n'.join(wts)
+		return words
+
+	def compile_mdx (self, filename):
+		words = self.compile_map()
 		title = u'有道词语辨析'
 		text = time.strftime('%Y-%m-%d %H:%M:%S')
 		desc = u'<font color="red">\n'
@@ -419,11 +439,13 @@ if __name__ == '__main__':
 		return 0
 
 	def test3():
-		resemble.load('resemble.txt')
+		if not resemble.load('resemble.txt'):
+			return -1
 		fn = u'd:/Program Files/GoldenDict/content/others/有道词语辨析.mdx'
 		resemble.compile_mdx(fn)
+		return 0
 
-	test3()
+	test2()
 
 
 
