@@ -36,23 +36,8 @@ if sys.version_info[0] >= 3:
 #----------------------------------------------------------------------
 # word strip
 #----------------------------------------------------------------------
-
-# strip word
 def stripword(word):
 	return (''.join([ n for n in word if n.isalnum() ])).lower()
-
-# used in sorting
-def compare_word(item):
-	text = []
-	part = []
-	word = item[1].lower()
-	for n in word:
-		if n.isalnum():
-			text.append(n)
-			part.append(n)
-		else:
-			part.append('~')
-	return (''.join(text), ''.join(part), word)
 
 
 #----------------------------------------------------------------------
@@ -170,8 +155,6 @@ class StarDict (object):
 		result = []
 		for record in records:
 			result.append(tuple(record))
-		if strip:
-			result.sort(key = compare_word)
 		return result
 
 	# 批量查询
@@ -517,8 +500,6 @@ class DictMySQL (object):
 		result = []
 		for record in records:
 			result.append(tuple(record))
-		if strip:
-			result.sort(key = compare_word)
 		return result
 
 	# 批量查询
@@ -931,8 +912,6 @@ class DictCsv (object):
 				break
 		cc = COLUMN_ID
 		likely = [ (tx[cc], tx[0]) for tx in index[middle:middle + count] ]
-		if strip:
-			likely.sort(key = compare_word)
 		return likely
 	
 	# 批量查询
