@@ -232,6 +232,32 @@ class Generator (object):
 				fp.write(w + '\n')
 		return True
 
+	def mdict2eudic (self, mdx_src, outname):
+		import codecs
+		with codecs.open(mdx_src, encoding = 'utf-8') as srcfp:
+			fp = codecs.open(outname, 'w', encoding = 'utf-8')
+			word = None
+			part = []
+			count = 0
+			for line in srcfp:
+				line = line.strip('\r\n\t ')
+				if not line:
+					continue
+				if word is None:
+					word = line
+					part = []
+				elif line != '</>':
+					part.append(line)
+				else:
+					text = ''.join(part)
+					fp.write(word + '@' + text + '\r\n')
+					word = None
+					part = []
+					count += 1
+					if count % 10000 == 0:
+						print('current count=%d'%count)
+		return True
+
 
 
 #----------------------------------------------------------------------
