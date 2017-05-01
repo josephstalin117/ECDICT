@@ -120,12 +120,12 @@ linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 * ~~搜索并校对：所有动词（3月21日根据 NodeBox 工具包校对完成）~~
 * ~~搜索并校对：所有副词（3月22日完成校对）~~
 * ~~搜索并校对：所有形容词（3月22日完成校对）~~
-* 搜索并校对：所有动物名词（http://lib.colostate.edu/wildlife/atoz.php?letter=all）
-* 搜索并校对：所有植物名词（http://davesgarden.com/guides/botanary/vbl/a/）
-* 搜索并校对：所有地理名词（http://www.itseducation.asia/geography/a.htm）
+* ~~搜索并校对：所有动物名词（http://lib.colostate.edu/wildlife/atoz.php?letter=all）~~
+* ~~搜索并校对：所有植物名词（http://davesgarden.com/guides/botanary/vbl/a/）~~
+* ~~搜索并校对：所有地理名词（http://www.itseducation.asia/geography/a.htm）~~
 * ~~搜索并校对：所有地名（https://en.wikipedia.org/wiki/Lists_of_cities_by_country）~~
 * ~~补充完成非核心词汇的英文释义~~
-* 补充各个单词的位置信息
+* ~~补充各个单词的位置信息~~
 * ~~补充动词的时态语态变种信息~~
 * 继续修订核心两万词汇的释义准确性
 
