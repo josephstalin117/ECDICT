@@ -1717,6 +1717,12 @@ class DictHelper (object):
 		if (not ' ' in word) and (not '-' in word):
 			if ('?' in word) or ('!' in word):
 				return False
+		if word.count('?') >= 2:
+			return False
+		if word.count('!') >= 2:
+			return False
+		if '---' in word:
+			return False
 		try:
 			word.lower()
 		except UnicodeWarning:
