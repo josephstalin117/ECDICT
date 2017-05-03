@@ -1693,7 +1693,8 @@ class DictHelper (object):
 							# print 'f1', ord(ch), word.find(ch)
 							return False
 		if alpha == 0:
-			return False
+			if not word.isdigit():
+				return False
 		if word[:1] == '"' and word[-1:] == '"':
 			return False
 		if word[:1] == '(' and word[-1:] == ')':
@@ -1713,6 +1714,9 @@ class DictHelper (object):
 			if (x < ord('a')) and (x > ord('z')):
 				if (x < ord('A')) and (x > ord('Z')):
 					return False
+		if (not ' ' in word) and (not '-' in word):
+			if ('?' in word) or ('!' in word):
+				return False
 		try:
 			word.lower()
 		except UnicodeWarning:
