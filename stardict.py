@@ -1336,7 +1336,7 @@ class DictHelper (object):
 	def export_stardict (self, wordmap, outname, title):
 		mainname = os.path.splitext(outname)[0]
 		keys = [ k for k in wordmap ]
-		keys.sort(key = lambda x: x.lower())
+		keys.sort(key = lambda x: (x.lower(), x))
 		import struct
 		pc = self.progress(len(wordmap))
 		position = 0
