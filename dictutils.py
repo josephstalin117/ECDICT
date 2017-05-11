@@ -101,23 +101,29 @@ class Generator (object):
 		origin = ''
 		if '0' in exchange:
 			origin = exchange['0']
-		if style == 0:
-			if text:
-				text = u'[时态] ' + text
-				if origin:
-					text += u' 原型: ' + origin
+			if '1' in exchange:
+				t = exchange['1']
+				origin = origin + u' 的' + stardict.tools._exchanges[t]
+		better = ''
+		if ('r' in exchange) and ('t' in exchange):
+			better = exchange['r'] + ', ' + exchange['t']
+		lines = []
+		if text:
+			if style == 0:
+				lines.append(u'[时态] ' + text)
 			else:
-				if origin:
-					text = u'[原型] ' + origin
-		else:
-			if text:
-				text = u'时态: ' + text
-				if origin:
-					text += u' 原型: ' + origin
+				lines.append(u'时态: ' + text)
+		if better:
+			if style == 0:
+				lines.append(u'[比较] ' + better)
 			else:
-				if origin:
-					text = u'原型: ' + origin
-		return text
+				lines.append(u'比较: ' + better)
+		if origin:
+			if style == 0:
+				lines.append(u'[原型] ' + origin)
+			else:
+				lines.append(u'原型: ' + origin)
+		return '\n'.join(lines)
 
 	def word_pos (self, data):
 		pos = stardict.tools.pos_extract(data)
@@ -521,8 +527,8 @@ if __name__ == '__main__':
 	
 	def test1():
 		db = stardict.open_local('stardict.db')
-		data = db['apples']
-		data = {'exchange':'p:P/d:D/i:I/0:haha'}
+		data = db['attics']
+		# data = {'exchange':'p:P/d:D/i:I/0:haha'}
 		print(generator.word_exchange(data, 0))
 		print(generator.word_exchange(data, 1))
 

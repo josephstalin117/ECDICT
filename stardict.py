@@ -1197,6 +1197,7 @@ class DictHelper (object):
 		self._exchanges['3'] = u'第三人称'
 		self._exchanges['r'] = u'比较级'
 		self._exchanges['t'] = u'最高级'
+		self._exchanges['s'] = u'复数'
 		self._exchanges['0'] = u'原型'		# best 的原型是 good
 		self._exchanges['1'] = u'类别'		# best 的类别是 good 里的 t
 		self._pos = {}
