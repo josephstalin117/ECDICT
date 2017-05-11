@@ -171,7 +171,6 @@ class Generator (object):
 			text = text + translation
 			exchange = self.word_exchange(data, 0)
 			if exchange:
-				exchange = exchange.replace('\\', '').replace('\n', '')
 				text = text + '\n\n' + exchange + ''
 			if tag:
 				text = text + '\n' + '(' + tag + ')'
@@ -244,7 +243,8 @@ class Generator (object):
 			if exchange:
 				if not style:
 					fp.write('<br><font color=gray>')
-					fp.write(text2html(exchange) + '</font>\r\n')
+					fp.write(text2html(exchange))
+					fp.write('</font>\r\n')
 				else:
 					fp.write(u'`2``4`' + text2html(exchange) + '`2`\r\n')
 			if tag:
