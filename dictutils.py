@@ -80,7 +80,7 @@ class Generator (object):
 			head = 'K' + head
 		return head.strip()
 
-	def word_exchange (self, data):
+	def word_exchange (self, data, style):
 		if not data:
 			return ''
 		exchange = data.get('exchange')
@@ -89,14 +89,35 @@ class Generator (object):
 			return ''
 		part = []
 		last = ''
-		for k, v in stardict.tools._exchanges:
+		for k in ('p', 'd', 'i', '3'):
 			p = exchange.get(k)
 			if p and p != last:
 				part.append(u'%s'%p)
 				last = p
 		if len(part) < 2:
-			return ''
-		return ', '.join(part)
+			text = ''
+		else:
+			text = ', '.join(part)
+		origin = ''
+		if '0' in exchange:
+			origin = exchange['0']
+		if style == 0:
+			if text:
+				text = u'[时态] ' + text
+				if origin:
+					text += u' 原型: ' + origin
+			else:
+				if origin:
+					text = u'[原型] ' + origin
+		else:
+			if text:
+				text = u'时态: ' + text
+				if origin:
+					text += u' 原型: ' + origin
+			else:
+				if origin:
+					text = u'原型: ' + origin
+		return text
 
 	def word_pos (self, data):
 		pos = stardict.tools.pos_extract(data)
@@ -142,10 +163,10 @@ class Generator (object):
 			else:
 				text = ''
 			text = text + translation
-			exchange = self.word_exchange(data)
+			exchange = self.word_exchange(data, 0)
 			if exchange:
 				exchange = exchange.replace('\\', '').replace('\n', '')
-				text = text + '\n\n' + u'[时态] ' + exchange + ''
+				text = text + '\n\n' + exchange + ''
 			if tag:
 				text = text + '\n' + '(' + tag + ')'
 			out[word] = text
@@ -213,13 +234,13 @@ class Generator (object):
 					tag = tag + ' -' + head
 				else:
 					tag = '-' + head
-			exchange = self.word_exchange(data)
+			exchange = self.word_exchange(data, 1)
 			if exchange:
 				if not style:
 					fp.write('<br><font color=gray>')
-					fp.write(u'时态: ' + text2html(exchange) + '</font>\r\n')
+					fp.write(text2html(exchange) + '</font>\r\n')
 				else:
-					fp.write(u'`2``4`时态：' + text2html(exchange) + '`2`\r\n')
+					fp.write(u'`2``4`' + text2html(exchange) + '`2`\r\n')
 			if tag:
 				if not style:
 					fp.write('<br><font color=gray>')
@@ -499,7 +520,11 @@ resemble = Resemble()
 if __name__ == '__main__':
 	
 	def test1():
-		print('hello')
+		db = stardict.open_local('stardict.db')
+		data = db['apples']
+		data = {'exchange':'p:P/d:D/i:I/0:haha'}
+		print(generator.word_exchange(data, 0))
+		print(generator.word_exchange(data, 1))
 
 	def test2():
 		resemble.load('resemble.txt')
@@ -516,7 +541,7 @@ if __name__ == '__main__':
 		resemble.compile_mdx(fn)
 		return 0
 
-	test3()
+	test1()
 
 
 

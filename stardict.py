@@ -1190,11 +1190,15 @@ class LemmaDB (object):
 class DictHelper (object):
 
 	def __init__ (self):
-		self._exchanges = []
-		self._exchanges.append(('p', u'过'))
-		self._exchanges.append(('d', u'完'))
-		self._exchanges.append(('i', u'现'))
-		self._exchanges.append(('3', u'三'))
+		self._exchanges = {}
+		self._exchanges['p'] = u'过去时'
+		self._exchanges['d'] = u'过去分词'
+		self._exchanges['i'] = u'现在分词'
+		self._exchanges['3'] = u'第三人称'
+		self._exchanges['r'] = u'比较级'
+		self._exchanges['t'] = u'最高级'
+		self._exchanges['0'] = u'原型'		# best 的原型是 good
+		self._exchanges['1'] = u'类别'		# best 的类别是 good 里的 t
 		self._pos = {}
 		self._pos['a'] = (u'代词', 'pron.')
 		self._pos['c'] = (u'连接词', 'conj.')
