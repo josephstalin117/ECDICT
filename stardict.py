@@ -1179,6 +1179,9 @@ class LemmaDB (object):
 	def __contains__ (self, stem):
 		return (stem in self._stems)
 
+	def __iter__ (self):
+		return self._stems.__iter__()
+
 
 
 #----------------------------------------------------------------------

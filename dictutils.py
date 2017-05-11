@@ -155,7 +155,7 @@ class Generator (object):
 		return pc.count
 
 	# 导出 Mdx 源文件，然后可以用 MdxBuilder 转换成 .mdx词典
-	def compile_mdx (self, dictionary, filename, mode = None):
+	def compile_mdx (self, dictionary, filename, mode = None, style = False):
 		words = stardict.tools.dump_map(dictionary, False)
 		fp = codecs.open(filename, 'w', 'utf-8')
 		text2html = self.text2html
@@ -172,25 +172,39 @@ class Generator (object):
 				translation = data['definition']
 			if not translation:
 				continue
+			# if pc.count >= 100000:
+			# 	break
 			head = self.word_level(data)
 			tag = self.word_tag(data)
 			fp.write(word.replace('\r', '').replace('\n', '') + '\r\n')
 			if 'name' in mode:
-				fp.write('<b style="font-size:180%%;">%s'%text2html(word))
-				fp.write('</b><br><br>\r\n')
+				if not style:
+					fp.write('<b style="font-size:180%%;">%s'%text2html(word))
+					fp.write('</b><br><br>\r\n')
+				else:
+					fp.write('`1`%s`2``2`\r\n'%text2html(word))
 			if 'phonetic' in mode:
 				if phonetic or head:
 					if phonetic:
-						fp.write('<font color=dodgerblue>')
-						fp.write(text2html(u'[%s]'%phonetic))
-						fp.write('</font>')
+						if not style:
+							fp.write('<font color=dodgerblue>')
+							fp.write(text2html(u'[%s]'%phonetic))
+							fp.write('</font>')
+						else:
+							fp.write('`3`' + text2html(u'[%s]'%phonetic))
 					if head:
 						if phonetic:
 							fp.write(' ')
-						fp.write('<font color=gray>')
-						fp.write(text2html(u'-%s'%head))
-						fp.write('</font>')
-					fp.write('<br><br>\r\n')
+						if not style:
+							fp.write('<font color=gray>')
+							fp.write(text2html(u'-%s'%head))
+							fp.write('</font>')
+						else:
+							fp.write('`4`' + text2html(u'-%s'%head))
+					if not style:
+						fp.write('<br><br>\r\n')
+					else:
+						fp.write('`2``2`\r\n')
 			for line in translation.split('\n'):
 				line = line.rstrip('\r\n ')
 				fp.write(text2html(line) + ' <br>\r\n')
@@ -201,12 +215,18 @@ class Generator (object):
 					tag = '-' + head
 			exchange = self.word_exchange(data)
 			if exchange:
-				fp.write('<br><font color=gray>')
-				fp.write(u'时态: ' + text2html(exchange) + '</font>\r\n')
+				if not style:
+					fp.write('<br><font color=gray>')
+					fp.write(u'时态: ' + text2html(exchange) + '</font>\r\n')
+				else:
+					fp.write(u'`2``4`时态：' + text2html(exchange) + '`2`\r\n')
 			if tag:
-				fp.write('<br><font color=gray>')
-				fp.write('(%s)'%text2html(tag))
-				fp.write('</font>\r\n')
+				if not style:
+					fp.write('<br><font color=gray>')
+					fp.write('(%s)'%text2html(tag))
+					fp.write('</font>\r\n')
+				else:
+					fp.write('`2``4`(%s)\r\n'%text2html(tag))
 			fp.write('</>')
 			if count < len(words) - 1:
 				fp.write('\r\n')
@@ -392,7 +412,7 @@ class Resemble (object):
 				lines.append(content)
 		return '\n'.join(lines)
 
-	def dump_html (self, wt):
+	def dump_html (self, wt, style = 0):
 		lines = []
 		text2html = self.text2html
 		lines.append('<div class="discriminate">')
@@ -403,10 +423,34 @@ class Resemble (object):
 		for content in wt['content']:
 			if isinstance(content, tuple) or isinstance(content, list):
 				head = content[0]
-				desc = content[1]
+				desc = [ n.rstrip('\n') for n in content[1].split('\n') ]
 				text = '<font color="dodgerblue">%s</font>: '%text2html(head)
-				text = text + text2html(desc)
+				text = text + text2html(desc[0])
 				lines.append(text + '<br>')
+				for line in desc[1:]:
+					line = line.strip('\r\n\t ')
+					if not line:
+						continue
+					if style == 0:
+						lines.append(text2html(line) + '<br>')
+					elif style == 1:
+						pos = -1
+						for i in xrange(len(line)):
+							if ord(line[i]) >= 128:
+								pos = i
+								break
+						if pos < 0:
+							en, cn = line, ''
+						else:
+							en, cn = line[:pos], line[pos:]
+						en = text2html(en.strip('\r\n\t '))
+						cn = text2html(cn.strip('\r\n\t '))
+						line = u'<font color=teal>&nbsp;• </font>'
+						if en:
+							line += '<font color="#008080">%s</font> &nbsp;'%en
+						if cn:
+							line += ' <font color="gray">%s</font>'%cn
+						lines.append('<i>' + line + '</i><br>')
 			else:
 				lines.append(text2html(content) + '<br>')
 		lines.append('</div>')
@@ -422,7 +466,7 @@ class Resemble (object):
 			pc.next()
 			if not word:
 				continue
-			wts = [ self.dump_html(wt) for wt in self._words[word] ]
+			wts = [ self.dump_html(wt, 1) for wt in self._words[word] ]
 			words[word] = '<br>\n'.join(wts)
 		return words
 
@@ -438,7 +482,6 @@ class Resemble (object):
 		desc += u'日期：%s<br>\n'%text
 		desc += '</font>'
 		stardict.tools.export_mdx(words, filename, title, desc)
-		pc.done()
 		return True
 
 
@@ -460,8 +503,10 @@ if __name__ == '__main__':
 
 	def test2():
 		resemble.load('resemble.txt')
-		print resemble.dump_text(resemble[0])
-		print ''
+		# print resemble.dump_text(resemble[0])
+		for wt in resemble['stimulate']:
+			print resemble.dump_html(wt, 1).encode('gbk', 'ignore')
+			print ''
 		return 0
 
 	def test3():
@@ -471,7 +516,7 @@ if __name__ == '__main__':
 		resemble.compile_mdx(fn)
 		return 0
 
-	test2()
+	test3()
 
 
 
