@@ -61,12 +61,26 @@ class WordHelper (object):
 			tenses['3'] = en.verb.present(word, person = 3, negate = False)
 		except:
 			return None
+		valid = True
+		for k in tenses:
+			v = tenses[k]
+			if not v:
+				valid = False
+				break
+			elif "'" in v:
+				valid = False
+				break
+		if not valid:
+			return None
 		return tenses
 
 	# 名词的复数：有时候不可数名词也会被加上 -s，需要先判断是否可数（语料库）
 	def noun_plural (self, word):
 		import en
-		return en.noun.plural(word)
+		plural = en.noun.plural(word)
+		if not plural:
+			return None
+		return plural
 
 	# 求解复数，使用 pattern.en 软件包
 	def pluralize (self, word):
