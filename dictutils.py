@@ -101,9 +101,21 @@ class Generator (object):
 		origin = ''
 		if '0' in exchange:
 			origin = exchange['0']
+			derive = ''
 			if '1' in exchange:
 				t = exchange['1']
-				origin = origin + u' 的' + stardict.tools._exchanges[t]
+				p = []
+				if 'p' in t and 'd' in t:
+					derive = u'过去时和过去分词'
+				elif 's' in t and '3' in t:
+					derive = u'第三人称单数'
+				else:
+					for x in ('i', 'p', 'd', '3', 's'):
+						if x in t:
+							derive = stardict.tools._exchanges[x]
+							break
+				if derive:
+					origin = data['word'] + u' 是 ' + origin + u' 的' + derive
 		better = ''
 		if ('r' in exchange) and ('t' in exchange):
 			better = exchange['r'] + ', ' + exchange['t']
@@ -115,9 +127,9 @@ class Generator (object):
 				lines.append(u'时态: ' + text)
 		if better:
 			if style == 0:
-				lines.append(u'[比较] ' + better)
+				lines.append(u'[级别] ' + better)
 			else:
-				lines.append(u'比较: ' + better)
+				lines.append(u'级别: ' + better)
 		if origin:
 			if style == 0:
 				lines.append(u'[原型] ' + origin)
@@ -527,7 +539,7 @@ if __name__ == '__main__':
 	
 	def test1():
 		db = stardict.open_local('stardict.db')
-		data = db['attics']
+		data = db['booked']
 		# data = {'exchange':'p:P/d:D/i:I/0:haha'}
 		print(generator.word_exchange(data, 0))
 		print(generator.word_exchange(data, 1))
