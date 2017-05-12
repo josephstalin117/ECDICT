@@ -309,7 +309,8 @@ class Generator (object):
 					part.append(line)
 				else:
 					text = ''.join(part)
-					fp.write(word + '@' + text + '\r\n')
+					if (not word[:1] == '-') and (not word[-1:] == '-'):
+						fp.write(word + '@' + text + '\r\n')
 					word = None
 					part = []
 					count += 1

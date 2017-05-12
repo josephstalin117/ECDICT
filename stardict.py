@@ -1194,7 +1194,7 @@ class DictHelper (object):
 		self._exchanges['p'] = u'过去时'
 		self._exchanges['d'] = u'过去分词'
 		self._exchanges['i'] = u'现在分词'
-		self._exchanges['3'] = u'第三人称'
+		self._exchanges['3'] = u'第三人称单数'
 		self._exchanges['r'] = u'比较级'
 		self._exchanges['t'] = u'最高级'
 		self._exchanges['s'] = u'复数'
