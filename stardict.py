@@ -1047,7 +1047,9 @@ class LemmaDB (object):
 					pass
 			if text is None:
 				text = content.decode('utf-8', 'ignore')
+		number = 0
 		for line in text.split('\n'):
+			number += 1
 			line = line.strip('\r\n ')
 			if (not line) or (line[:1] == ';'):
 				continue
@@ -1079,7 +1081,6 @@ class LemmaDB (object):
 		stems.sort(key = lambda x: x.lower())
 		import codecs
 		fp = codecs.open(filename, 'w', encoding)
-		rn = (sys.platform[:3] != 'win') and '\n' or '\r\n'
 		output = []
 		for stem in stems:
 			words = self.get(stem)
@@ -1088,7 +1089,7 @@ class LemmaDB (object):
 			frq = self._frqs.get(stem, 0)
 			if frq > 0:
 				stem = '%s/%d'%(stem, frq)
-			output.append((-frq, u'%s -> %s%s'%(stem, ','.join(words), rn)))
+			output.append((-frq, u'%s -> %s'%(stem, ','.join(words))))
 		output.sort()
 		for _, text in output:
 			fp.write(text + '\n')
