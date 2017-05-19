@@ -151,7 +151,7 @@ class Generator (object):
 
 	def text2html (self, text):
 		import cgi
-		return cgi.escape(text, True).replace('\n', '<br>')
+		return cgi.escape(text, True).replace('\n', '</br>')
 
 	# 导出星际译王的词典源文件，用于 DictEditor 转换
 	def compile_stardict (self, dictionary, filename, title):
@@ -218,7 +218,7 @@ class Generator (object):
 			if 'name' in mode:
 				if not style:
 					fp.write('<b style="font-size:180%%;">%s'%text2html(word))
-					fp.write('</b><br><br>\r\n')
+					fp.write('</b></br></br>\r\n')
 				else:
 					fp.write('`1`%s`2``2`\r\n'%text2html(word))
 			if 'phonetic' in mode:
@@ -240,12 +240,12 @@ class Generator (object):
 						else:
 							fp.write('`4`' + text2html(u'-%s'%head))
 					if not style:
-						fp.write('<br><br>\r\n')
+						fp.write('</br></br>\r\n')
 					else:
 						fp.write('`2``2`\r\n')
 			for line in translation.split('\n'):
 				line = line.rstrip('\r\n ')
-				fp.write(text2html(line) + ' <br>\r\n')
+				fp.write(text2html(line) + ' </br>\r\n')
 			if (not 'phonetic' in mode) and head:
 				if tag:
 					tag = tag + ' -' + head
@@ -254,14 +254,14 @@ class Generator (object):
 			exchange = self.word_exchange(data, 1)
 			if exchange:
 				if not style:
-					fp.write('<br><font color=gray>')
+					fp.write('</br><font color=gray>')
 					fp.write(text2html(exchange))
 					fp.write('</font>\r\n')
 				else:
 					fp.write(u'`2``4`' + text2html(exchange) + '`2`\r\n')
 			if tag:
 				if not style:
-					fp.write('<br><font color=gray>')
+					fp.write('</br><font color=gray>')
 					fp.write('(%s)'%text2html(tag))
 					fp.write('</font>\r\n')
 				else:
@@ -438,7 +438,7 @@ class Resemble (object):
 
 	def text2html (self, text):
 		import cgi
-		return cgi.escape(text, True).replace('\n', '<br>')
+		return cgi.escape(text, True).replace('\n', '</br>')
 
 	def dump_text (self, wt):
 		lines = []
@@ -466,13 +466,13 @@ class Resemble (object):
 				desc = [ n.rstrip('\n') for n in content[1].split('\n') ]
 				text = '<font color="dodgerblue">%s</font>: '%text2html(head)
 				text = text + text2html(desc[0])
-				lines.append(text + '<br>')
+				lines.append(text + '</br>')
 				for line in desc[1:]:
 					line = line.strip('\r\n\t ')
 					if not line:
 						continue
 					if style == 0:
-						lines.append(text2html(line) + '<br>')
+						lines.append(text2html(line) + '</br>')
 					elif style == 1:
 						pos = -1
 						for i in xrange(len(line)):
@@ -490,9 +490,9 @@ class Resemble (object):
 							line += '<font color="#008080">%s</font> &nbsp;'%en
 						if cn:
 							line += ' <font color="gray">%s</font>'%cn
-						lines.append('<i>' + line + '</i><br>')
+						lines.append('<i>' + line + '</i></br>')
 			else:
-				lines.append(text2html(content) + '<br>')
+				lines.append(text2html(content) + '</br>')
 		lines.append('</div>')
 		lines.append('</div>')
 		return '\n'.join(lines)
@@ -507,7 +507,7 @@ class Resemble (object):
 			if not word:
 				continue
 			wts = [ self.dump_html(wt, 1) for wt in self._words[word] ]
-			words[word] = '<br>\n'.join(wts)
+			words[word] = '</br>\n'.join(wts)
 		return words
 
 	def compile_mdx (self, filename):
@@ -515,11 +515,11 @@ class Resemble (object):
 		title = u'有道词语辨析'
 		text = time.strftime('%Y-%m-%d %H:%M:%S')
 		desc = u'<font color="red">\n'
-		desc += u'有道词语辨析<br>\n'
-		desc += u'词条数：%d<br>\n'%len(self._words)
-		desc += u'词组数：%d<br>\n'%len(self._resembles)
-		desc += u'作者：skywind<br>\n'
-		desc += u'日期：%s<br>\n'%text
+		desc += u'有道词语辨析</br>\n'
+		desc += u'词条数：%d</br>\n'%len(self._words)
+		desc += u'词组数：%d</br>\n'%len(self._resembles)
+		desc += u'作者：skywind</br>\n'
+		desc += u'日期：%s</br>\n'%text
 		desc += '</font>'
 		stardict.tools.export_mdx(words, filename, title, desc)
 		return True
