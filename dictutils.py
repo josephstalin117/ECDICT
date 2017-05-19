@@ -106,7 +106,7 @@ class Generator (object):
 				t = exchange['1']
 				p = []
 				if 'p' in t and 'd' in t:
-					derive = u'过去时和过去分词'
+					derive = u'过去式和过去分词'
 				elif 's' in t and '3' in t:
 					derive = u'第三人称单数'
 				else:

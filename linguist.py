@@ -75,12 +75,40 @@ class WordHelper (object):
 		return tenses
 
 	# 名词的复数：有时候不可数名词也会被加上 -s，需要先判断是否可数（语料库）
-	def noun_plural (self, word):
-		import en
-		plural = en.noun.plural(word)
+	def noun_plural (self, word, method = 0):
+		plural = None
+		if method == 0:
+			import en
+			plural = en.noun.plural(word)
+		elif method == 1:
+			import pattern.en
+			plural = pattern.en.pluralize(word)
+		elif method == 2:
+			import inflect
+			plural = inflect.pluralize(word)
+		elif method < 0:
+			plural = self.noun_plural(word, 0)
+			if not plural:
+				plural = self.noun_plural(word, 1)
+				if not plural:
+					try:
+						import inflect
+						plural = inflect.pluralize(word)
+					except:
+						pass
 		if not plural:
 			return None
 		return plural
+
+	# 求解比较级
+	def adjective_comparative (self, word):
+		import pattern.en
+		return pattern.en.comparative(word)
+
+	# 求解最高级
+	def adjective_superlative (self, word):
+		import pattern.en
+		return pattern.en.superlative(word)
 
 	# 求解复数，使用 pattern.en 软件包
 	def pluralize (self, word):
