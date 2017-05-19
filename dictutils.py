@@ -89,43 +89,53 @@ class Generator (object):
 			return ''
 		part = []
 		last = ''
+		count = 0
 		for k in ('p', 'd', 'i', '3'):
 			p = exchange.get(k)
-			if p and p != last:
-				part.append(u'%s'%p)
-				last = p
-		if len(part) < 2:
+			if p:
+				count += 1
+				if p != last:
+					part.append(u'%s'%p)
+					last = p
+		if count < 4:
 			text = ''
 		else:
 			text = ', '.join(part)
 		origin = ''
-		if '0' in exchange:
-			origin = exchange['0']
-			derive = ''
+		t = exchange.get('0', '')
+		if t.lower() == data['word'].lower():
+			del exchange['0']
 			if '1' in exchange:
-				t = exchange['1']
-				p = []
-				if 'p' in t and 'd' in t:
-					derive = u'过去式和过去分词'
-				elif 's' in t and '3' in t:
-					derive = u'第三人称单数'
-				else:
-					for x in ('i', 'p', 'd', '3', 's'):
-						if x in t:
-							derive = stardict.tools._exchanges[x]
-							break
-				if derive:
-					origin = data['word'] + u' 是 ' + origin + u' 的' + derive
+				del exchange['1']
+		if '0' in exchange:
+			t = exchange['0']
+			if t != data['word']:
+				origin = t
+				derive = ''
+				if '1' in exchange:
+					t = exchange['1']
+					p = []
+					if 'p' in t and 'd' in t:
+						derive = u'过去式和过去分词'
+					elif 's' in t and '3' in t:
+						derive = u'第三人称单数'
+					else:
+						for x in ('i', 'p', 'd', '3', 's', 'r', 't'):
+							if x in t:
+								derive = stardict.tools._exchanges[x]
+								break
+					if derive:
+						origin = data['word'] + u' 是 ' + origin + u' 的' + derive
 		better = ''
 		if ('r' in exchange) and ('t' in exchange):
 			better = exchange['r'] + ', ' + exchange['t']
 		lines = []
-		if text:
+		if text and (not exchange.get('1', '') in ('p', 'd', 'i', '3', 'pd', 'dp')):
 			if style == 0:
 				lines.append(u'[时态] ' + text)
 			else:
 				lines.append(u'时态: ' + text)
-		if better:
+		if better and (not exchange.get('1', '') in ('r', 't')):
 			if style == 0:
 				lines.append(u'[级别] ' + better)
 			else:
@@ -540,7 +550,7 @@ if __name__ == '__main__':
 	
 	def test1():
 		db = stardict.open_local('stardict.db')
-		data = db['booked']
+		data = db['talked']
 		# data = {'exchange':'p:P/d:D/i:I/0:haha'}
 		print(generator.word_exchange(data, 0))
 		print(generator.word_exchange(data, 1))
