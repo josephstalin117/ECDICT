@@ -130,7 +130,8 @@ class Generator (object):
 		if ('r' in exchange) and ('t' in exchange):
 			better = exchange['r'] + ', ' + exchange['t']
 		lines = []
-		if text and (not exchange.get('1', '') in ('p', 'd', 'i', '3', 'pd', 'dp')):
+		# if text and (not exchange.get('1', '') in ('p', 'd', 'i', '3', 'pd', 'dp')):
+		if text:
 			if style == 0:
 				lines.append(u'[时态] ' + text)
 			else:
@@ -550,7 +551,7 @@ if __name__ == '__main__':
 	
 	def test1():
 		db = stardict.open_local('stardict.db')
-		data = db['talked']
+		data = db['higher']
 		# data = {'exchange':'p:P/d:D/i:I/0:haha'}
 		print(generator.word_exchange(data, 0))
 		print(generator.word_exchange(data, 1))
