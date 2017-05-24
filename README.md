@@ -139,14 +139,14 @@ d:perceived/p:perceived/3:perceives/i:perceiving
 
 linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 
-## 《简明英汉增强版》
+## 简明英汉增强版
 
 使用 ECDICT 的数据，生成了《[简明英汉字典增强版](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)》的字典词库，可以在 GoldenDict, 欧陆, MDict, StarDict, BlueDict, EDWin 里面加载，还有 Kindle 格式，可以在 Kindle 里面挂载。这是全网收词量最多的本地化词典，再也不用联网查单词忍受网速慢，广告多和效率低的问题了。
 
 [简明英汉增强版-说明和下载](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)
 
 
-## 更多文档
+## 文档索引
 
 * [项目维基](https://github.com/skywind3000/ECDICT/wiki)
 * [简明英汉增强版](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)
