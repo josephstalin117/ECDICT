@@ -35,17 +35,50 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 | phonetic | 音标，以英语英标为主 |
 | definition | 单词释义（英文），每行一个释义 |
 | translation | 单词释义（中文），每行一个释义 |
-| pos | 词语位置，用 "/" 分割不同位置 （待添加） |
+| pos | 词语位置，用 "/" 分割不同位置 |
 | collins | 柯林斯星级 |
 | oxford | 是否是牛津三千核心词汇 | 
 | tag | 字符串标签：zk/中考，gk/高考，cet4/四级 等等标签，空格分割 |
 | bnc | 英国国家语料库词频顺序 |
 | frq | 当代语料库词频顺序 |
-| exchange | 时态复数等变换，目前已经添加一万多个动词的变化形式 |
+| exchange | 时态复数等变换，使用 "/" 分割不同项目，见后面表格 |
 | detail | json 扩展信息，字典形式保存例句（待添加） |
 | audio | 读音音频 url （待添加）|
 
 提供一段 Python 程序来读取这些数据，可以用它转换到 SQLite 和 MySQL 的数据库里，方便你用更高级的方法筛选查询。词条数据大小写不敏感，不论从查询还是排序，还是编程接口。
+
+## 词形变化
+
+某个动词的各种时态是什么？某个形容词的比较级和最高级又是什么？某个名词的复数呢？这个单词是由哪个单词怎么演变而来的？它的原型单词（Lemma）是什么？
+
+可能大家注意到上表有一个 `Exchange` 字段，它就是来做这个事情的，这是本词典一大特色之一，格式如下：
+
+```text
+类型1:变换单词1/类型2:变换单词2
+```
+
+比如 perceive 这个单词的 exchange 为：
+
+```text
+d:perceived/p:perceived/3:perceives/i:perceiving
+```
+
+意思是 perceive 的过去式（`p`） 为 perceived，过去分词（`d`）为 perceived, 现在分词（'i'）是 perceiving，第三人称单数（`3`）为 perceives。冒号前面具体项目为：
+
+| 类型 | 说明 |
+|------|------|
+| p | 过去式（did） |
+| d | 过去分词（done）|
+| i | 现在分词（doing）|
+| 3 | 第三人称单数（does）|
+| r | 形容词比较级（-er）|
+| t | 形容词最高级（-est）|
+| s | 名词复数形式 |
+| 0 | Lemma，如 perceived 的 Lemma 是 perceive |
+| 1 | Lemma的变换形式，比如 s 代表 apples 是其 lemma的复数形式 |
+
+这个是根据 BNC 语料库和 NodeBox / WordNet 的语言处理工具生成的，有了这个 Exchange ，有了这个东西，你的 App 能为用户提供更多信息。
+
 
 ## 编程接口
 
@@ -106,9 +139,20 @@ BNC较为全面和传统，针对性学习能帮助你阅读各类国外帝王�
 
 linguist.py 里面有一些简单的 WordNet, NodeBox 封装。
 
+## 《简明英汉增强版》
+
+使用 ECDICT 的数据，生成了《[简明英汉字典增强版](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)》的字典词库，可以在 GoldenDict, 欧陆, MDict, StarDict, BlueDict, EDWin 里面加载，还有 Kindle 格式，可以在 Kindle 里面挂载。这是全网收词量最多的本地化词典，再也不用联网查单词忍受网速慢，广告多和效率低的问题了。
+
+[简明英汉增强版-说明和下载](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)
+
+
 ## 更多文档
 
 * [项目维基](https://github.com/skywind3000/ECDICT/wiki)
+* [简明英汉增强版](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%AD%97%E5%85%B8%E5%A2%9E%E5%BC%BA%E7%89%88)
+* [简明英汉增强版-欧陆专版](https://github.com/skywind3000/ECDICT/wiki/%E7%AE%80%E6%98%8E%E8%8B%B1%E6%B1%89%E5%A2%9E%E5%BC%BA%E7%89%88%EF%BC%88%E6%AC%A7%E9%99%86%EF%BC%89)
+* [选词来源](https://github.com/skywind3000/ECDICT/wiki/%E9%80%89%E8%AF%8D)
+* [双解释义](https://github.com/skywind3000/ECDICT/wiki/%E5%8F%8C%E8%A7%A3%E9%87%8A%E4%B9%89)
 
 
 ## 欢迎贡献
