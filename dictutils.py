@@ -329,6 +329,18 @@ class Generator (object):
 						print('current count=%d'%count)
 		return True
 
+	def load_index (self, filename, encoding = 'utf-8', lower = False):
+		words = {}
+		for line in codecs.open(filename, encoding = encoding):
+			line = line.strip('\r\n\t ')
+			if not line:
+				continue
+			if lower:
+				words[line.lower()] = line
+			else:
+				words[line] = line
+		return words
+
 
 
 #----------------------------------------------------------------------
@@ -538,10 +550,286 @@ class Resemble (object):
 
 
 #----------------------------------------------------------------------
+# Treasure
+#----------------------------------------------------------------------
+class Treasure (object):
+
+	def __init__ (self):
+		self.mark1 = '<font style="color:#c4151b;margin-right:.2em;font-weight:bold;font-style:italic;">'
+		self.generator = Generator()
+
+	def text2html (self, text):
+		import cgi
+		return cgi.escape(text, True).replace('\n', '</br>')
+
+	def clear_html (self, text):
+		return text.replace('<', '').replace('>', '').replace('&', '')
+
+	def detail (self, data, name, default = None):
+		detail = data.get('detail')
+		if not detail:
+			return default
+		return detail.get(name, default)
+
+	def define_html (self, definition, plain = False):
+		lines = []
+		if plain:
+			return self.text2html(definition)
+		text2html = self.text2html
+		for line in definition.split('\n'):
+			line = line.rstrip('\r\n\t ')
+			if not line:
+				pass
+			pos = line.find('.')
+			head = ''
+			if pos > 0 and line[:pos].strip('\t ').isalpha():
+				if pos < 8:
+					head = line[:pos+1].rstrip(' ')
+					line = line[pos+1:].lstrip(' ')
+			text = ''
+			if head:
+				text += self.mark1
+				text += text2html(head)
+				text += '</font> '
+			text += text2html(line)
+			lines.append(text)
+		return '</br>\n'.join(lines)
+
+	def get_definition (self, data, plain = False):
+		definition = data['definition']
+		if not definition:
+			return None
+		return self.define_html(definition, plain)
+
+	def get_translation (self, data, plain = False):
+		translation = data['translation']
+		if not translation:
+			return None
+		return self.define_html(translation, plain)
+
+	def get_phonetic (self, data):
+		phonetic = data['phonetic']
+		if not phonetic:
+			return None
+		return '[' + self.clear_html(phonetic) + ']'
+
+	def get_level (self, data):
+		text = self.generator.word_tag(data)
+		head = self.generator.word_level(data)
+		if head:
+			if text:
+				text += ' -' + head
+			else:
+				text = '-' + head
+		if text:
+			return self.clear_html(u'(%s)'%text)
+		return None
+
+	def get_exchange (self, data):
+		text = ''
+		exchange = data.get('exchange')
+		if not exchange:
+			return None
+		chg = stardict.tools.exchange_loads(exchange)
+		if not chg:
+			return None
+		part = []
+		last = ''
+		count = 0
+		for k in ('p', 'd', 'i', '3'):
+			p = chg.get(k)
+			if p:
+				count += 1
+				if p != last:
+					part.append(u'%s'%p)
+					last = p
+		if count == 4:
+			text = ', '.join(part)
+			return self.clear_html(u'时态：' + text)
+		if ('r' in chg) and ('t' in chg):
+			text = ', '.join([chg['r'], chg['t']])
+			return self.clear_html(u'级别：' + text)
+		return None
+
+	def get_syno (self, data, plain = False):
+		detail = data.get('detail')
+		if not detail:
+			return None
+		syno = detail.get('syno')
+		if not syno:
+			return None
+		lines = []
+		for group in syno:
+			text = group[0]
+			word = ', '.join(group[1])
+			lines.append('<b>' + self.define_html(text, plain) + '</b>')
+			text = '<i>&nbsp;- ' + self.text2html(word) + '</i>'
+			lines.append(text)
+		return '<br>\n'.join(lines)
+
+	def get_proportion (self, data):
+		detail = data.get('detail')
+		if not detail:
+			return None
+		return detail.get('proportion')
+
+	def get_cald (self, data):
+		detail = data.get('detail')
+		if not detail:
+			return None
+		html = detail.get('cald')
+		if not html:
+			return None
+		text = html
+		mark = '<hr style="height:1px; border:none;  border-top:1px darkblue dashed;"/>'
+		p1 = text.find(mark)
+		if p1 >= 0:
+			text = text[p1 + len(mark):]
+		test = '<font color=darkcyan>['
+		p1 = text.find(test)
+		if p1 >= 0:
+			p1 = text.find(']</font>', p1)
+			if p1 >= 0:
+				text = text[p1+8:]
+		newmark = '<hr style="height:1px; border:none;  border-top:1px black dashed; background-color:#ffffff; width:80%"/>'
+		text = text.strip('\n\r ')
+		text = text.replace(mark, newmark + '\n')
+		return text
+
+	def get_collins (self, data):
+		return self.detail(data, 'collins', None)
+
+	def get_memo (self, data):
+		detail = data.get('detail')
+		output = []
+		if not detail:
+			detail = {}
+		youci = detail.get('youci')
+		if youci:
+			p1 = youci.find('<br>\n')
+			if p1 >= 0:
+				youci = youci[p1 + 5:]
+			if youci:
+				head = u'<span class="head">【优词】　</span> '
+				head = ''
+				output.append(head + youci)
+		xdf = detail.get('xdf')
+		if xdf:
+			head = u'<span class="head">【新东方】　</span>'
+			head = ''
+			output.append(head + xdf)
+		bzsd = detail.get('bzsd')
+		if bzsd:
+			head = u'<span class="head">【不择手段】　</span>'
+			head = ''
+			output.append(head + self.text2html(bzsd))
+		if not output:
+			return None
+		return '<br><br>\n'.join(output)
+
+	def get_extra (self, data):
+		detail = data.get('detail')
+		if not detail:
+			return None
+		output = []
+		resemble = detail.get('resemble')
+		if resemble:
+			head = u'<span class="head">【有道词语辨析】</div><br>\n'
+			head = ''
+			output.append(head + resemble)
+		syno = detail.get('syno')
+		if syno:
+			head = u'<span class="head">【有道近义词】</div><br>\n'
+			head = ''
+			output.append(head + self.get_syno(data))
+		if not output:
+			return None
+		return '<br>\n'.join(output)
+
+	def get_explain (self, data):
+		cald = self.get_cald(data)
+		if cald:
+			return cald
+		return self.get_collins(data)
+
+	def generate_front (self, data):
+		html = []
+		text = "<div style='text-align:center'><h1>%s</h1></div>"
+		html.append(text%self.text2html(data['word']))
+		html.append("<div style='text-align:center; font-size:85%;'>")
+		text = "<span style='font-family: Arial; color:blue;'>%s</span>"
+		html.append(text%self.get_phonetic(data))
+		text = "<span style='font-family: Arial; color:gray;'>%s</span>"
+		html.append(text%self.get_level(data))
+		html.append('</div>')
+		return '\n'.join(html)
+
+	def generate_back (self, data):
+		html = []
+		html.append('<div>')
+		hr = "height:1px;border:none;border-top:1px dashed #0066CC;"
+		hr = hr + "background-color:#ffffff;"
+		hr = '<hr style="%s">'%hr
+		text = "<div style='color:BlueViolet;text-align:center;font-size:16px;'>%s</div>"
+		html.append(text%self.get_translation(data))
+		html.append('<br>')
+		exchange = self.get_exchange(data)
+		if exchange:
+			text = "<div style='font-size:12px;color:gray;text-align:center'>%s</div>"
+			html.append(text%exchange)
+		proportion = self.get_proportion(data)
+		if proportion:
+			text = u"<div style='font-size:12px;color:gray;text-align:center'>分布：%s</div>"
+			html.append(text%proportion)
+		html.append(hr)
+		memo = self.get_memo(data)
+		if memo:
+			html.append('<div style="text-align:left;color:#895b8a;font-size:14px;">')
+			html.append(memo)
+			html.append('</div>')
+			html.append(hr)
+		explain = self.get_explain(data)
+		if explain:
+			html.append('<div style="text-align:left;font-size:14px;">')
+			html.append(explain)
+			html.append('</div>')
+		extra = self.get_extra(data)
+		if extra:
+			html.append(hr)
+			html.append('<div style="color:gray;font-size:14px;text-align:left">')
+			html.append(extra)
+			html.append('</div>')
+		html.append('</div>')
+		return '\n'.join(html)
+
+	def compile_mdx (self, db, name1, name2):
+		mdx1 = {}
+		mdx2 = {}
+		pc = stardict.tools.progress(len(db))
+		for _, word in db:
+			pc.next()
+			data = db[word]
+			mdx1[word] = self.generate_front(data)
+			mdx2[word] = self.generate_back(data)
+		pc.done()
+		if os.path.splitext(name1)[-1].lower() == '.mdx':
+			stardict.tools.export_mdx(mdx1, name1, 'anki-front')
+		else:
+			stardict.tools.export_mdict(mdx1, name1)
+		if os.path.splitext(name2)[-1].lower() == '.mdx':
+			stardict.tools.export_mdx(mdx2, name2, 'anki-back')
+		else:
+			stardict.tools.export_mdict(mdx2, name2)
+		return 0
+
+
+
+#----------------------------------------------------------------------
 # generation
 #----------------------------------------------------------------------
 generator = Generator()
 resemble = Resemble()
+treasure = Treasure()
 
 
 #----------------------------------------------------------------------
@@ -571,7 +859,22 @@ if __name__ == '__main__':
 		resemble.compile_mdx(fn)
 		return 0
 
-	test1()
+	def test4():
+		db = stardict.open_local('treasure.db')
+		data = db['breakup']
+		# html = treasure.define_html(data['translation'])
+		html = treasure.get_collins(data).encode('gbk', 'ignore')
+		print html
+
+	def test5():
+		name1 = 'anki-front.txt'
+		name2 = 'anki-back.txt'
+		home = 'd:/Program Files/GoldenDict/content/Others/'
+		home = '../../../work/'
+		db = stardict.open_local('treasure.db')
+		treasure.compile_mdx(db, home + name1, home + name2)
+
+	test5()
 
 
 
