@@ -284,6 +284,167 @@ class Generator (object):
 		pc.done()
 		return pc.count
 
+	def _split_pos (self, text):
+		pos = text.find('.')
+		if pos < 0:
+			return '', text
+		if text[:pos].isalpha() and pos < 8:
+			return text[:pos + 1], text[pos+1:].lstrip('\t ')
+		return '', text
+
+	# 生成支持 css 的 tag
+	def _generate_tag (self, fp, data):
+		tag = data.get('tag')
+		frq = data.get('frq')
+		bnc = data.get('bnc')
+		if (not tag) and (not frq) and (not bnc):
+			return False
+		text2html = self.text2html
+		out = fp.write
+		outline = lambda x: fp.write(x + '\r\n')
+		outtext = lambda x: fp.write(text2html(x))
+		
+		return True
+
+	# 生成支持 css 的 html
+	def _generate_html (self, fp, data):
+		text2html = self.text2html
+		out = fp.write
+		outline = lambda x: fp.write(x + '\r\n')
+		outtext = lambda x: fp.write(text2html(x))
+		word = data['word']
+		phonetic = data['phonetic']
+		translation = data['translation']
+		if not translation:
+			translation = data['definition']
+		if not translation:
+			return False
+		outline('<div class="bdy" id="ecdict">')
+		outline('<div class="ctn" id="content">')
+
+		# word head
+		outline('<div class="hwd">%s</div>'%text2html(word))
+		outline('<hr class="hrz">')
+
+		# phonetic and tag
+		head = self.word_level(data)
+		if phonetic or head:
+			outline('<div class="git">')
+			if phonetic:
+				outline('  <span class="ipa">[%s]</span>'%text2html(phonetic))
+			if head:
+				outline('  <span class="hnt">-</span>')
+			if data.get('oxford'):
+				t = u'Oxford 3000 Keywords'
+				p = u'<span>\u203B</span>'
+				outline('  <span class="oxf" title="%s">%s</span>'%(t, p))
+			collins = data.get('collins', '0')
+			if isinstance(collins, str) or isinstance(collins, unicode):
+				if collins in ('', '0'):
+					collins = 0
+				else:
+					collins = int(collins)
+			if collins:
+				title = 'Collins Stars'
+				out('  <span class="col" title="%s">'%title)
+				out(u'\u2605' * int(collins))
+				outline('</span>')
+			outline('</div>')
+
+		# translation
+		outline('<div class="gdc">')
+		for line in translation.split('\n'):
+			line = line.rstrip('\r\n')
+			outline('  <div class="dcb">')
+			if line[:4] == u'[网络]':
+				text = text2html(line[4:].lstrip('\t '))
+				outline(u'    <span class="dnt">[网络]</span>')
+				outline(u'    <span class="dne">%s</span>'%text)
+			elif line[:1] == '>':
+				text = text2html(line)
+				outline(u'    <span class="deq">%s</span>'%text)
+			else:
+				pos, text = self._split_pos(line)
+				if pos:
+					outline('    <span class="pos">%s</span>'%text2html(pos))
+				if text:
+					outline('    <span class="dcn">%s</span>'%text2html(text))
+			outline('  </div>')
+		outline('</div>')
+
+		# exchange
+		exchange = self.word_exchange(data, 0)
+		if exchange:
+			outline('<div class="gfm">')
+			for line in exchange.split('\n'):
+				line = line.rstrip('\r\n\t ')
+				if line.startswith(u'[时态]'):
+					text = text2html(line[4:].lstrip(' '))
+					outline('  <div class="fmb">')
+					outline('    <span class="fnm">%s</span>'%u'时态:')
+					outline('    <span class="frm">%s</span>'%text)
+					outline('  </div>')
+				elif line.startswith(u'[级别]'):
+					text = text2html(line[4:].lstrip(' '))
+					outline('  <div class="qmb">')
+					outline('    <span class="qnm">%s</span>'%u'级别:')
+					outline('    <span class="qrm">%s</span>'%text)
+					outline('  </div>')
+				elif line.startswith(u'[原型]'):
+					text = text2html(line[4:].lstrip(' '))
+					outline('  <div class="orb">')
+					outline('    <span class="onm">%s</span>'%u'原型:')
+					outline('    <span class="orm">%s</span>'%text)
+					outline('  </div>')
+			outline('</div>')
+
+		# tag
+		tag = self.word_tag(data)
+		if tag:
+			title = ''
+			frq = data.get('frq')
+			bnc = data.get('bnc')
+			if frq:
+				title = u'COCA: %s'%frq
+			if bnc:
+				if title:
+					title += ', '
+				title += 'BNC: %s'%bnc
+			outline('<div class="frq" title="%s">'%title)
+			outline('  (' + text2html(tag) + ')')
+			outline('</div>')
+			
+		# finalize
+		outline('<hr class="hr2"/>')
+		outline('</div>')
+		outline('</div>')
+		return True
+
+	def compile_css (self, dictionary, filename, css = None):
+		fp = codecs.open(filename, 'w', 'utf-8')
+		text2html = self.text2html
+		pc = stardict.tools.progress(len(dictionary))
+		if not css:
+			main = os.path.split(filename)[-1]
+			css = os.path.splitext(main)[0] + '.css'
+		for _, word in dictionary:
+			pc.next()
+			data = dictionary.query(word)
+			translation = data['translation']
+			if not translation:
+				translation = data['definition']
+			if not translation:
+				continue
+			fp.write(word.replace('\r', '').replace('\n', '') + '\r\n')
+			fp.write('<link href="%s" rel="stylesheet" type="text/css"/>\r\n'%css)
+			self._generate_html(fp, data)
+			fp.write('</>')
+			if pc.count < pc.total:
+				fp.write('\r\n')
+		fp.close()
+		pc.done()
+		return 0
+
 	def list_load (self, filename, encoding = 'utf-8'):
 		words = {}
 		import codecs
@@ -874,7 +1035,16 @@ if __name__ == '__main__':
 		db = stardict.open_local('treasure.db')
 		treasure.compile_mdx(db, home + name1, home + name2)
 
-	test5()
+	def test6():
+		db = stardict.open_local('ultimate.db')
+		data = db['sting']
+		data['translation'] += u'\n> hahahah\n[网络] 你好'
+		import StringIO
+		sio = StringIO.StringIO()
+		generator._generate_html(sio, data)
+		print sio.getvalue().encode('gbk', 'ignore')
+
+	test6()
 
 
 
